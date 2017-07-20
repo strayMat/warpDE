@@ -1,0 +1,145 @@
+---
+title: "lineageDE workflow"
+author: "Matthieu Doutreligne"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{lineage DE workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography : /home/matthieu/Documents/Berkeley/work_Berkeley/paper/library.bib
+link-citations: true
+---
+
+```{r setup, include = F}
+knitr::opts_chunk$set(cache=TRUE, message = F, fig.show = "hold")
+library(ggplot2)
+theme_update(plot.title = element_text(hjust = 0.5))
+```
+
+# 1 - Introduction
+
+This vignette will describe the workflow of the R package `lineageDE`, showing two different methods to infer differentially expressed genes from reconstructed cell lineages. After a step of cell ordering reconstruction performed with `Slingshot` (see [@Street2017]) we try to find genes with significantly different behaviours between two cell lineages.
+
+This vignette will use the data from [@Fletcher2017] of Olfactory Epithelium cells from mouses. We restricted the data to only two cell lineages for simplicity purpose.
+<!-- ![Cell lineages in the study](images/fig:lignees_study.png) -->
+
+<img src="images/fig:lignees_study.png" alt="alt text" width=100% height=30%>
+<center>Cell lineages used in the study</center>
+
+## 1.1 - Preprocessing of the data for our analysis
+
+Before searching for differentially expressed genes between lineages, we have to preprocess the data and run slingshot on it. We use data from [@Fletcher2017], which is already filtered and normalized with [Scone](https://github.com/YosefLab/scone) . Scone tries different normalization techniques, batch or technical effects removal methods and provides tools to rank this different normalizations.
+
+We load this data from the package [lineageDE](https://github.com/strayMat/lineageDE) which contains also the different functions that we use in this study. We also load the package [slingshot](https://github.com/kstreet13/slingshot) [@Street2017] which allow us to perform the lineage inferrence.
+
+```{r}
+library(lineageDE)
+library(slingshot)
+# For nice color
+library(RColorBrewer)
+data("OE_counts")
+```
+
+We perform a usual transformation with `log(1+x)` and we run PCA as the dimension reduction technique:
+```{r}
+pca <- prcomp(t(log1p(counts)))
+# nice colors for the clusters
+clust_col = brewer.pal(length(unique(clusters)),"Set3")[as.numeric(clusters)] 
+plot3d(pca$x[,1:3], col = clust_col)
+```
+
+We apply slingshot to infer the lineages curves: 
+```{r}
+slrun <- slingshot(pca$x[,1:3], clusters, start.clus = '1', end.clus = '4')
+plot3d(pca$x[,1:3], col = clust_col)
+plot3d.SlingshotDataSet(slrun, type = "curves", add = T)
+```
+
+```{r,fig.height=5, fig.width=5, fig.align="center"}
+# generate 2D captures of the 3d plots for the rmarkdown
+par(cex.main = 1)
+plot(pca$x[,1:2], col = clust_col, pch=16, asp = 1)
+for(c in curves(slrun)){ 
+  lines(c$s[c$tag,c(1,2)], lwd = 1)
+}
+title("View of the first two Pcs of the data with principal curves")
+```
+
+Then, we store the slingshot outputs for our future DE analysis:
+```{r}
+times <- pseudotime(slrun)
+weights <- curveWeights(slrun)
+# Normalization of the weights (we want convex weights)
+w1 <- weights[,1]/(weights[,1] + weights[,2])
+w2 <- weights[,2]/(weights[,1] + weights[,2])
+w <- cbind(w1,w2)
+```
+
+# 2 - Visualization of the data
+
+Create a new data object for the analysis with the desired inputs: 
+```{r}
+df <- new("lineageDEDataSet", logCounts = log1p(counts), t = times, w = w)
+```
+
+We plot the gene expression profile for the first gene of the dataset: CreER
+The points are colored by lineage: red is the first lineage (GBC and neuronal cells) and blue is the second lineage (sustentacular cells).
+```{r,fig.height=4, fig.width=6, fig.align="center"}
+gene <- "CreER"
+plot_gene(df, gene, regression = F)
+```
+We fit a different loess regression for each lineage and one loess regression including both lineages at the same time (the null model). This gives us a representation of the activation pattern for a given gene.
+```{r,fig.height=4, fig.width=6, fig.align="center"}
+plot_gene(df, gene, legend.show = T)$pl
+```
+The main goal of the analysis is to find genes which are strongly differrentially expressed between the two reconstructed lineages. In a sense we are searching for branching expression pattern, branching curves uin our visualization.
+```{r}
+plot_gene(df, 'Ncaph2')$pl 
+plot_gene(df, 'Cyp2g1')$pl 
+```
+On the left, we see an unintersting pattern for us, because both genes are expressed similarly in both lineages.
+On the right, we displayed Cyp2g1, a differentially expressed gene similar to the one that we want to detect.
+
+# 3 - Likelihood method
+
+```{r}
+ranking <- dtw_rank(df)
+
+plot_multigenes(df.t, ranking.dtw.t, rownames(counts)[1:8], grid.size = c(2,4))
+ranking.dtw.t@ranking.df$
+```
+
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
+
+# References
+
