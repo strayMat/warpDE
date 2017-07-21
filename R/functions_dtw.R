@@ -18,7 +18,7 @@ dtw_rank <- function(data,
                      window.size = NULL,
                      equal.size = NULL,
                      Zscore = F){
-  logCounts <- data@logCounts
+  logCounts <- log1p(data@counts)
   w <- data@w
   t <- data@t
   n <- nrow(logCounts)
@@ -61,7 +61,7 @@ dtw_rank <- function(data,
 
 
 
-# Bootstraps over cells :
+# Bootstraps over cells : for confidence interval and sd
 cells_bootstrap <- function(df, ranking.subset, nb_bootstrap = 1000){
   sub.size <- nrow(ranking.subset)
   prediction_length <- 100

@@ -7,8 +7,8 @@
 #'   methods for manipulating \code{lineageDEDataSet} objects are  also
 #'   described below.
 #'
-#' @param logCounts matrix. An \code{n} by \code{m} numeric matrix or data
-#'   frame giving the filtered, normalized RNA logcounts. In rows are the genes and in columns are the cells. It should contain the names of the cells and the genes in \code{colnames(logCounts)} and \code{rownames(logCounts)}.
+#' @param counts matrix. An \code{n} by \code{m} numeric matrix or data
+#'   frame giving the filtered, normalized RNA counts. In rows are the genes and in columns are the cells. It should contain the names of the cells and the genes in \code{colnames(counts)} and \code{rownames(counts)}.
 #'
 #' @param t matrix. An  \code{m} by 2 numeric matrix
 #'   denoting each cell's reconstructed ordering position or pseudotime for the two lineages to compare.
@@ -18,21 +18,21 @@
 
 setGeneric(
   name = "newLineageDEDataSet",
-  signature = c('logCounts','t', 'w'),
-  def = function(logCounts, t, w, ...) {
+  signature = c('counts','t', 'w'),
+  def = function(counts, t, w, ...) {
     standardGeneric("newLineageDEDataSet")
   }
 )
 
 # accessor functions
-#' @title Returns the logcounts matrix of the dataset
-#'@name logCounts
+#' @title Returns the counts matrix of the dataset
+#'@name counts
 #' @param x an object that describes a dataset
 #' @return the matrix representing log1p of the data.
 #' @export
-setGeneric(name = "logCounts",
+setGeneric(name = "counts",
            signature = "x",
-           def = function(x) standardGeneric("logCounts"))
+           def = function(x) standardGeneric("counts"))
 
 #' @title Returns the pseudotimes
 #' @name t

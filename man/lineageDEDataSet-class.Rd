@@ -4,12 +4,12 @@
 \name{lineageDEDataSet-class}
 \alias{lineageDEDataSet-class}
 \alias{lineageDEDataSet}
-\alias{logCounts,lineageDEDataSet-method}
+\alias{counts,lineageDEDataSet-method}
 \alias{t,lineageDEDataSet-method}
 \alias{w,lineageDEDataSet-method}
 \title{Class \code{lineageDEDataSet}}
 \usage{
-\S4method{logCounts}{lineageDEDataSet}(x)
+\S4method{counts}{lineageDEDataSet}(x)
 
 \S4method{t}{lineageDEDataSet}(x)
 
@@ -26,7 +26,7 @@ The \code{lineageDEDataSet} class holds data relevant for
 }
 \section{Methods (by generic)}{
 \itemize{
-\item \code{logCounts}: returns the matrix of logcounts.
+\item \code{counts}: returns the matrix of counts.
 
 \item \code{t}: returns the vector of pseudotimes..
 

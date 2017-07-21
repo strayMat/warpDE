@@ -5,11 +5,11 @@
 \alias{newlineageDEDataSet}
 \title{Initialize an object of class \code{lineageDEDataSet}}
 \usage{
-newLineageDEDataSet(logCounts, t, w, ...)
+newLineageDEDataSet(counts, t, w, ...)
 }
 \arguments{
-\item{logCounts}{matrix. An \code{n} by \code{m} numeric matrix or data
-frame giving the filtered, normalized RNA logcounts. In rows are the genes and in columns are the cells. It should contain the names of the cells and the genes in \code{colnames(logCounts)} and \code{rownames(logCounts)}.}
+\item{counts}{matrix. An \code{n} by \code{m} numeric matrix or data
+frame giving the filtered, normalized RNA counts. In rows are the genes and in columns are the cells. It should contain the names of the cells and the genes in \code{colnames(counts)} and \code{rownames(counts)}.}
 
 \item{t}{matrix. An  \code{m} by 2 numeric matrix
 denoting each cell's reconstructed ordering position or pseudotime for the two lineages to compare.}

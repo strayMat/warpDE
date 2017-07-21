@@ -1,11 +1,11 @@
 # accessor methods
-#' @describeIn lineageDEDataSet returns the matrix of logcounts.
+#' @describeIn lineageDEDataSet returns the matrix of counts.
 #' @param x a \code{lineageDEDataSet} object.
 #' @export
 setMethod(
-  f = "logCounts",
+  f = "counts",
   signature = "lineageDEDataSet",
-  definition = function(x) x@logCounts
+  definition = function(x) x@counts
 )
 
 #' @describeIn lineageDEDataSet returns the vector of pseudotimes..
@@ -32,7 +32,7 @@ setMethod(
 setMethod(
   f = "ranking.df",
   signature = "rankingDE",
-  definition = function(x) x@ranking.df
+  definition = function(x) data.frame(x@ranking.df)
 )
 
 #' @describeIn rankingDE returns list of parameters used to create the ranking.

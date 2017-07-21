@@ -84,7 +84,7 @@ w <- cbind(w1,w2)
 
 Create a new data object for the analysis with the desired inputs: 
 ```{r}
-df <- new("lineageDEDataSet", logCounts = log1p(counts), t = times, w = w)
+df <- new("lineageDEDataSet", counts = counts, t = times, w = w)
 ```
 
 We plot the gene expression profile for the first gene of the dataset: CreER
@@ -109,7 +109,9 @@ On the right, we displayed Cyp2g1, a differentially expressed gene similar to th
 
 ```{r}
 ranking <- dtw_rank(df)
-save(df, ranking, file = "/home/matthieu//Documents/Berkeley/work_Berkeley/lineageDE/tests/test.data.RData")
+ranking.dtw.t <- ranking
+df.t <- df
+#save(ranking.dtw.t, df.t, file = "/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/tests/test.data.RData")
 plot_multigenes(df.t, ranking.dtw.t, rownames(counts)[1:8], grid.size = c(2,4))
 ranking.dtw.t@ranking.df$
 ```

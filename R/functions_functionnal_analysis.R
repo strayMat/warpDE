@@ -1,3 +1,69 @@
+#' @title Compute vgam pvalues and aic difference criteria
+#' @name criteria_vgam
+#'
+#' @description Perform vgam regression with \code{reg_vgam} function and compute p-values based on a likelihood ratio test as well as a AIC based criteria (computation of the difference of AIC between the null model and the alternative model).
+#'
+#' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' @param gene character, a gene of interest.
+#' @param fam the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
+#' @param aic logical, if the aic criteria is to be computedor not (default is TRUE).
+#'
+#' @return returns the pvalue and if asked the aic difference for the gene of intereset.
+#'
+#' @import VGAM
+#' @export
+
+pval_vgam <- function(data, gene, fam = "gaussian", aic = T){
+  v_reg <- reg_vgam(data, gene, fam)
+  v_reg1 <- v_reg$reg$spl1
+  v_reg2 <- v_reg$reg$spl2
+  v_reg.d <- v_reg$reg$spl.d
+  testStatistic <- -2* (logLik(v_reg.d) - logLik(v_reg2) - logLik(v_reg1))
+  pval <- pchisq(testStatistic, df = (length(coef(v_reg2)) + length(coef(v_reg1)))- length(coef(v_reg.d)))
+  if (aic == T){
+    aic1 <- AIC(v_reg1) + AIC(v_reg2)
+    aic.diff <- AIC(v_reg.d) - aic1
+    return(list(pval = pval, aic.diff = aic.diff))
+  }
+  return(pval)
+}
+
+#' @title Vgam ranks
+#' @name vgam_rank
+#'
+#' @description compute vgam ranks with likelihood ratio test p-values and aic difference criteria
+#'
+#' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' @param gene character, a gene of interest.
+#' @param fam the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
+#' @param aic logical, if the aic criteria is to be computedor not (default is TRUE).
+#'
+#' @return returns \code{rankingDE} objects: one for the likelihood ratio test pvalues and one for the aic difference criteria if aic == T.
+#'
+#' @import VGAM
+#' @export
+
+vgam_rank <- function(data,
+                      fam = "gaussian",
+                      aic = T){
+  res <- list()
+  pval_v <- sapply(rownames(data@counts), function(x) pval_vgam(data, x))
+  # only one for the p-values which is disturbing for now
+  pvalues_v <- unlist(pval_v[1,])
+  v_gaus_ranking_pval <- data.frame(pval = pvalues_v, rank = length(pvalues_v) - rank(pvalues_v) + 1)
+  v_gaus_ranking_pval <- v_gaus_ranking_pval[order(v_gaus_ranking_pval$rank),]
+  res$pval_vgam <- new("rankingDE", ranking.df = v_gaus_ranking_pval, params = list(method = "vgam likelihood", fam = fam, criteria = "pval"))
+  if (aic ==T){
+    aic_v <-unlist(pval_v[2,])
+    v_gaus_ranking_aic <- data.frame(aic.diff = aic_v, rank = length(aic_v) - rank(aic_v) + 1)
+    v_gaus_ranking_aic <- v_gaus_ranking_aic[order(v_gaus_ranking_aic$rank),]
+    res$aic_vgam <- new("rankingDE", ranking.df = v_gaus_ranking_aic, params = list(method = "vgam likelihood", fam = fam, criteria = "AIC"))
+  }
+  return(res)
+}
+
+
+
 ####### Compute alternative and null models and compute their residuals and
 #number of parameters and standard error
 

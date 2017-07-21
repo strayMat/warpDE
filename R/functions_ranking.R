@@ -1,26 +1,54 @@
-#library(VGAM)
-# Compare ranking : two functions to give an idea of the similarity between two ranking.
-# Another good measure of similarity is the kendall's tau which counts the number of permutations.
-# these function takes as input an output of the format of the dtw_ranking function:
-# ranking = dataframe(dist = distance values for the ranking, rank = ranks of the elements )
-# rownames(ranking) are gene names
+#' @title Compare two rankings by counting the shared elements along the rankings.
+#' @name quantiles_shared
+#'
+#' @description Compares two \code{rankingDE} by computing the shared elements in different cumulative quantiles of the rankings.
+#'
+#' @param ranking1 a first \code{rankingDE} object.
+#' @param ranking2 a second \code{rankingDE} object.
+#' @param quantiles quantiles of the distribution that we wat to compare (default is is 20-quantiles).
+#' @param nmax integer, design the last elemtns where to stop the comparison (default is the minimum length of the two rankings).
 
-compare_ranking <- function(ranking1, ranking2, nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
+#'
+#' @return returns a dataframe displaying the number of common elements between the two ranking in the cumulative quantiles.
+#'
+#' @export
+
+quantiles_shared <- function(ranking1, ranking2, quantiles = c(0.01,seq(0.05,1, length.out = 20)), nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
+  method1 <- params(ranking1)$method
+  method2 <- params(ranking2)$method
+  ranking1 <- ranking.df(ranking1)
+  ranking2 <- ranking.df(ranking2)
   best1 <- ranking1[order(ranking1[,2]),]
   best2 <- ranking2[order(ranking2[,2]),]
-  ind <- round(seq(10,nmax, length.out = 20),0)
+
+  ind <- round(quantiles*nmax,0)
   inter <- matrix(NA,nrow = 1, ncol = length(ind))
   for (i in 1:length(ind)){
     inter[1,i] <- round(length(intersect(rownames(best1)[1:ind[i]], rownames(best2)[1:ind[i]]))/ind[i],2)
   }
   colnames(inter) <- ind
+  rownames(inter) <- paste(method1,"vs", method2)
   return(inter)
 }
 
-###### More visual
-plot_2rankings <- function(ranking1, ranking2, nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
-  xlab <- deparse(substitute(ranking1))
-  ylab <- deparse(substitute(ranking2))
+#' @title Compare two rankings by scatter plotting them
+#' @name plot_rankings
+#'
+#' @description Compares two \code{rankingDE} by plotting the ranks of their elements against each other.
+#'
+#' @param ranking1 a first \code{rankingDE} object.
+#' @param ranking2 a second \code{rankingDE} object.
+#' @param nmax integer, design the last elemtns where to stop the comparison (default is the minimum length of the two rankings).
+#'
+#' @return returns a plot comparing two plots rank by rank.
+#'
+#' @import ggplot2
+#' @export
+plot_rankings <- function(ranking1, ranking2, nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
+  xlab <- params(ranking1)$method
+  ylab <- params(ranking2)$method
+  ranking1 <- ranking.df(ranking1)
+  ranking2 <- ranking.df(ranking2)
   ranking1 <- ranking1[ranking1[,2]<nmax,]
   ranking2 <- ranking2[ranking2[,2]<nmax,]
   commons <- intersect(rownames(ranking1), rownames(ranking2))
@@ -29,22 +57,66 @@ plot_2rankings <- function(ranking1, ranking2, nmax = min(dim(ranking1)[1], dim(
   return(sc_plot)
 }
 
-###### kendall tau adapted to my format of rankings
-ken_tau <- function(ranking1,ranking2, nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
+
+#' @title Compute kendall's tau between two rankings
+#' @name kendall
+#'
+#' @description Compares two \code{rankingDE} by computing their kendall's tau from package \code{VGAM}.
+#'
+#' @param ranking1 a first \code{rankingDE} object.
+#' @param ranking2 a second \code{rankingDE} object.
+#' @param nmax integer, design the last elemtns where to stop the comparison (default is the minimum length of the two rankings).
+#'
+#'  @details Kendall's tau is basically the number of permutation between the ranks of the elements of two rankings : tau = ((number of concordant pairs) - (number of discordant pairs))/N
+#'
+#' @return returns Kendall's tau.
+#'
+#' @importFrom VGAM kendall.tau
+#' @export
+kendall <- function(ranking1,ranking2, nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
+  ranking1 <- ranking.df(ranking1)
+  ranking2 <- ranking.df(ranking2)
   ranking1 <- ranking1[ranking1[,2]<nmax,]
   ranking2 <- ranking2[ranking2[,2]<nmax,]
   commons <- intersect(rownames(ranking1), rownames(ranking2))
   return(kendall.tau(ranking1[commons,2], ranking2[commons,2]))
 }
 
-####### Elbow curve for quick vizualization of the rankings
-elbow_curve <- function(ranking, xmax = nrow(ranking)){
+#' @title Compare two rankings with different means
+#' @name compare_rankings
+#'
+#' @description Compares two \code{rankingDE} by plotting them against each othe, computing the number of shared elements in the cumulative quantiles of the rankings and computing their kendall's tau.
+#'
+#' @param ranking1 a first \code{rankingDE} object.
+#' @param ranking2 a second \code{rankingDE} object.
+
+#' @return returns the three measures of similarity between the rankings.
+#'
+#' @export
+
+compare_rankings <- function(ranking1, ranking2){
+  res <- list(pl = plot_rankings(ranking1, ranking2), quantiles.shared = quantiles_shared(ranking1, ranking2), kendall.tau = kendall(ranking1, ranking2))
+}
+
+
+
+
+#' @title Elbow curve for a ranking
+#' @name elbow_curve
+#'
+#' @description Plot an elbow curve of the distribution of distances from a \code{rankingDE}. It gives an idea of the shape of the distribution and can help select a threshold for the differntially expressed genes.
+#'
+#' @param ranking a \code{rankingDE} object.
+#' @param xmax integer, at which rank we cut off the curve. (default is length(ranking))
+#' @param xfit integer, cutoff for the plot of the tangent at the origin (default is 0.005*length(ranking)).
+#'
+#' @return returns \itemize{\item{a plot of the distances against the ranks of the elements in the ranking.}\item{rank threshold}}
+#'
+#' @export
+elbow_curve <- function(ranking, xmax = nrow(ranking.df(ranking)), xfit = 0.005* nrow(ranking.df(ranking)) ){
   x <- seq(1,xmax)
   y <- as.numeric(ranking$dist[order(-ranking$dist)])[1:xmax]
 
-  logscale <- grid.arrange(ggplot() + geom_point(aes(x = x, y = y)) + xlab("rank of gene") + ylab("dtw distance") + expand_limits(x = 0, y =0) + ggtitle("dtw distances against ranking"), ggplot() + geom_point(aes(x = x, y =y)) + xlab("rank of gene") + ylab("dtw distance") + expand_limits(x = 0, y =0) + scale_y_log10()+ ggtitle("log10(dtw) distances against ranking"))
-
-  # "Best" subset of the data to fit an exponential
   xfit <- 50
   y <- as.numeric(ranking$dist[order(-ranking$dist)])[1:xmax]
   d <- ggplot() + geom_point(aes(x = x, y = y)) + xlab("rank of gene") + ylab("dtw distance") + expand_limits(x = 0, y =0)
@@ -55,5 +127,5 @@ elbow_curve <- function(ranking, xmax = nrow(ranking)){
   thres_plot <- d + geom_abline(intercept = tan$coefficients[1], slope = tan$coefficients[2], color = "red")+
     annotate("text", label = paste("threshold:", thres), x  = thres + xmax/13, y = - 0.005, size = 4)+
     geom_point(aes(x = thres, y = 0), color = "red")
-  return(list(pl = thres_plot, thres = thres, logpl = logscale))
+  return(list(pl = thres_plot, thres = thres))
 }

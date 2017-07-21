@@ -4,7 +4,7 @@
 \alias{plot_gene}
 \alias{plot_gene}
 \alias{plot_multigenes}
-\title{Plot one gene raw data and its regressions}
+\title{Plot one gene raw data and its loess regressions}
 \usage{
 plot_gene(data, gene, regression = T, MD = T, span = 0.75, npred = F,
   sd.show = F, legend.show = F)
@@ -16,7 +16,7 @@ plot_multigenes(data, ranking, subset.genes, MD = F, grid.size = NULL)
 
 \item{gene}{character, a gene of interest.}
 
-\item{regression}{logical, if the regression is to be computed and plotted or not (defualt is TRUE).}
+\item{regression}{logical, if the loess regression is to be computed and plotted or not (defualt is TRUE).}
 
 \item{MD}{logical, if the null model is to be computed and plotted or not (default is TRUE).}
 
