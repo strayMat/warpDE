@@ -9,7 +9,7 @@
 #' @param gene character, a gene of interest.
 #' @param regression logical, if the loess regression is to be computed and plotted or not (defualt is TRUE).
 #' @param MD logical, if the null model is to be computed and plotted or not (default is TRUE).
-#' @param span numeric, a span parameter for the loess regression (default is 0.75, same as the \code{loess} function).
+#' @param span numeric, a span parameter for the loess regression (default is 0.5).
 #' @param npred logical, if the unshared part of the data is to be plotted or not(default is FALSE).
 #' @param sd.show logical, if the plot of standard deviation is wanted (default is FALSE).
 #'
@@ -24,7 +24,7 @@ reg_loess <- function(data,
                       gene,
                       regression = T,
                       MD = T,
-                      span = 0.75,
+                      span = 0.5,
                       npred = F,
                       sd.show = F,
                       legend.show = F){

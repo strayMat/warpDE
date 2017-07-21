@@ -1,85 +1,87 @@
-#' @title Compute vgam pvalues and aic difference criteria
-#' @name criteria_vgam
+#' @title Compute pvalues and aic difference criteria
+#' @name likelihood_criteria
 #'
-#' @description Perform vgam regression with \code{reg_vgam} function and compute p-values based on a likelihood ratio test as well as a AIC based criteria (computation of the difference of AIC between the null model and the alternative model).
+#' @description Perform a regression with \code{reg_vgam} or \code{reg_loess} function and compute p-values based on a likelihood ratio test as well as a AIC based criteria (computation of the difference of AIC between the null model and the alternative model).
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
-#' @param fam the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
+#' @param reg the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.
 #' @param aic logical, if the aic criteria is to be computedor not (default is TRUE).
-#'
+#' @param span numeric, for the loess regression, control the ammount of regularization for the loess regression.
+#' @param fam character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
+
 #' @return returns the pvalue and if asked the aic difference for the gene of intereset.
 #'
-#' @import VGAM
+#' @importFrom VGAM logLik
+#' @importFrom VGAM AIC
+#' @importFrom VGAM df.residual
 #' @export
 
-pval_vgam <- function(data, gene, fam = "gaussian", aic = T){
-  v_reg <- reg_vgam(data, gene, fam)
-  v_reg1 <- v_reg$reg$spl1
-  v_reg2 <- v_reg$reg$spl2
-  v_reg.d <- v_reg$reg$spl.d
-  logLik1 <- logLik(v_reg1)
-  logLik2 <- logLik(v_reg2)
-  logLik.d <- logLik(v_reg.d)
-  testStatistic <- 2* (logLik(v_reg2) + logLik(v_reg1) - logLik(v_reg.d))
-  pval <- pchisq(testStatistic, df = df.residual(v_reg.d) - (df.residual(v_reg2) + df.residual(v_reg1)), lower.tail = F)
+likelihood_criteria <- function(data, gene, reg = "loess", aic = T, span = 0.5, fam = "gaussian"){
+  if (reg == "loess"){
+    regs <- reg_loess(data, gene, span = span)
+    method = list(reg = reg, span = span)
+  }
+  else if (reg == "vgam"){
+    regs <- reg_vgam(data, gene, fam)
+    method <- list(reg = reg, fam = fam)
+  }
+  reg1 <- regs$reg[[1]]
+  reg2 <- regs$reg[[2]]
+  reg.d <- regs$reg[[3]]
+  testStatistic <- 2* (logLik(reg2)[1] + logLik(reg1)[1] - logLik(reg.d)[1])
+  pval <- pchisq(testStatistic, df = df.residual(reg.d) - (df.residual(reg2) + df.residual(reg1)), lower.tail = F)
   if (aic == T){
-    aic1 <- AIC(v_reg1) + AIC(v_reg2)
-    aic.diff <- AIC(v_reg.d) - aic1
-    return(list(pval = pval, aic.diff = aic.diff))
+    aic.diff <- AIC(reg.d) - (AIC(reg1) + AIC(reg2))
+    return(list(pval = pval, aic.diff = aic.diff, method = method))
   }
   return(pval)
 }
 
 #' @title Vgam ranks
-#' @name vgam_rank
+#' @name likelihood_rank
 #'
 #' @description compute vgam ranks with likelihood ratio test p-values and aic difference criteria
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
-#' @param gene character, a gene of interest.
-#' @param fam the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
+#' @param reg the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.
 #' @param aic logical, if the aic criteria is to be computedor not (default is TRUE).
+#' @param span numeric, for the loess regression, control the ammount of regularization for the loess regression.
+#' @param fam character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
 #'
 #' @return returns \code{rankingDE} objects: one for the likelihood ratio test pvalues and one for the aic difference criteria if aic == T.
 #'
-#' @import VGAM
 #' @export
 
-vgam_rank <- function(data,
-                      fam = "gaussian",
-                      aic = T){
+likelihood_rank <- function(data,
+                      reg = "loess",
+                      aic = T,
+                      span = 0.5,
+                      fam = "gaussian"
+                      ){
   res <- list()
-  pval_v <- sapply(rownames(data@counts), function(x) pval_vgam(data, x))
+  criteria <- sapply(rownames(data@counts), function(x) likelihood_criteria(data, x))
   # only one for the p-values which is disturbing for now
-  pvalues_v <- unlist(pval_v[1,])
-  v_gaus_ranking_pval <- data.frame(pval = pvalues_v, rank = length(pvalues_v) - rank(pvalues_v) + 1)
-  v_gaus_ranking_pval <- v_gaus_ranking_pval[order(v_gaus_ranking_pval$rank),]
-  res$pval_vgam <- new("rankingDE", ranking.df = v_gaus_ranking_pval, params = list(method = "vgam likelihood", fam = fam, criteria = "pval"))
+  pvalues <- unlist(criteria[1,])
+  method <- unlist(criteria[3,])
+  ranking_pval <- data.frame(pval = pvalues, rank = length(pvalues) - rank(pvalues) + 1)
+  ranking_pval <- ranking_pval[order(ranking_pval$rank),]
+  method$criteria <- "pval"
+  res$pval <- new("rankingDE", ranking.df = ranking_pval, params = method)
   if (aic ==T){
-    aic_v <-unlist(pval_v[2,])
-    v_gaus_ranking_aic <- data.frame(aic.diff = aic_v, rank = length(aic_v) - rank(aic_v) + 1)
-    v_gaus_ranking_aic <- v_gaus_ranking_aic[order(v_gaus_ranking_aic$rank),]
-    res$aic_vgam <- new("rankingDE", ranking.df = v_gaus_ranking_aic, params = list(method = "vgam likelihood", fam = fam, criteria = "AIC"))
+    aic <-unlist(criteria[2,])
+    ranking_aic <- data.frame(aic.diff = aic, rank = length(aic) - rank(aic) + 1)
+    ranking_aic <- ranking_aic[order(ranking_aic$rank),]
+    method$criteria <- "AIC difference"
+    res$aic <- new("rankingDE", ranking.df = ranking_aic, params = method)
   }
   return(res)
 }
 
-#' @title Vgam ranks
-#' @name vgam_rank
-#'
-#' @description compute vgam ranks with likelihood ratio test p-values and aic difference criteria
-#'
-#' @param data a \code{lineageDEDataSet} with results to be plotted.
-#' @param gene character, a gene of interest.
-#' @param fam the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
-#' @param aic logical, if the aic criteria is to be computedor not (default is TRUE).
-#'
-#' @return returns \code{rankingDE} objects: one for the likelihood ratio test pvalues and one for the aic difference criteria if aic == T.
-#'
-#' @import VGAM
-#' @export
-#'
+
+
+
+##### normalement pas besoin de ça
 build_residuals <- function(data, M0 = F){
   n = dim(data$log_counts)[1]
   m = dim(data$log_counts)[2]
