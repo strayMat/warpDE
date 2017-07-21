@@ -1,7 +1,7 @@
 ## Individual gene plots with loess
-## plot_gene
+## reg_loess
 #' @title Plot one gene raw data and its loess regressions
-#' @name plot_gene
+#' @name reg_loess
 #'
 #' @description Tools for visualizing gene signals for one given gene.
 #'
@@ -18,23 +18,33 @@
 #'
 #' @import ggplot2
 #' @importFrom msir loess.sd
+#' @import gam
 #' @export
-plot_gene <- function(data,
+reg_loess <- function(data,
                       gene,
                       regression = T,
                       MD = T,
                       span = 0.75,
                       npred = F,
                       sd.show = F,
-                      legend.show = F
-){
+                      legend.show = F){
   t = data@t
   w = data@w
-  prediction_length <- 100
+  y = log1p(data@counts[gene,])
+  # discard NAS from analysis
+  w1 <- w[w[,1]!=0,1]
+  w2 <- w[w[,2]!=0,2]
+  l1_cells <- names(w1)
+  l2_cells <- names(w2)
+  y1 <- y[l1_cells]
+  y2 <- y[l2_cells]
+  t1 <- t[l1_cells,1]
+  t2 <- t[l2_cells,2]
+  reg.df1 <- data.frame(y.fit = y1, x.fit = t1, w.fit = w1)
+  reg.df2 <- data.frame(y.fit = y2, x.fit = t2, w.fit = w2)
   #time to predict the new data
-  t1new <- seq(0, max(t[,1], na.rm = T), length.out = prediction_length)
-  t2new <- seq(0,max(t[,2], na.rm = T), length.out = prediction_length)
-  y <- log1p(data@counts[gene,])
+  t1new <- seq(0, max(t[,1], na.rm = T), length.out = length(l1_cells))
+  t2new <- seq(0,max(t[,2], na.rm = T), length.out = length(l1_cells))
 
   pl <- ggplot() +
     geom_point(aes(t[,2], y), col = "blue", shape = 2, alpha = w[,2], na.rm =T) +
@@ -45,23 +55,23 @@ plot_gene <- function(data,
     return(pl)
   }
   else{
-    #alternative model
-    lo1 <- loess(y ~ t[,1], weights = w[,1], span = span)
-    lo2 <- loess(y ~ t[,2], weights = w[,2], span = span)
-    # prediciton at new points and curve plotting
-    y_pred1 <- predict(lo1, t1new)
-    y_pred2 <- predict(lo2, t2new)
+    lo1 <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df1)
+    lo2 <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df2)
+    y_pred1 <- predict(lo1, data.frame(x.fit = t1new))
+    y_pred2 <- predict(lo2, data.frame(x.fit = t2new))
     plalt <- pl +
       geom_line(aes(t1new, y_pred1), color = "red", linetype = 1, na.rm =T) +
       geom_line(aes(t2new, y_pred2), color = "blue", linetype = 1, na.rm =T)
-
-    reg <- list(lo1 = lo1, lo2 = lo2)
-
-    # null models
+      reg <- list(lo1 = lo1, lo2 = lo2)
     if (MD == T){
-      lodouble <- loess(c(y, y) ~ c(t[,1], t[,2]), weights = c(w[,1], w[,2]), span = span, na.action = na.exclude)
-      plalt <- plalt + geom_line(aes(t1new, predict(lodouble, t1new), colour = "null model"), linetype = 2, na.rm = T)
-      reg$lod <- lodouble
+      # null model
+      reg.df.d <- rbind(reg.df1, reg.df2)
+      lod <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df.d)
+      y_pred.d <- predict(lod, data.frame(x.fit = t1new))
+      plalt <- plalt + geom_line(aes(t1new, y_pred.d, colour = "null model"), linetype = 2, na.rm = T)
+      reg$lod = lod
+    }
+
     }
     if (sd.show == T){
       ## confidence intervals:
@@ -77,13 +87,13 @@ plot_gene <- function(data,
       middle_w2 <- w[w[,2]!=0 & w[,2]!=1,2]
       cells_pred1 <- names(w[w[,1] > (0.5 + sd(middle_w1)),1])
       cells_pred2 <- names(w[w[,2] > (0.5 + sd(middle_w2)),2])
-      plalt <- plalt + geom_point(aes(t[cells_pred1,1], predict(reg$lo1, t[cells_pred1,1])), alpha = 0.4)+
-        geom_point(aes(t[cells_pred2,2], predict(reg$lo2, t[cells_pred2,2])), alpha = 0.4)
+      plalt <- plalt + geom_point(aes(t[cells_pred1,1], predict(reg$lo1, data.frame(x.fit = t[cells_pred1,1]))), alpha = 0.4, col = "red")+
+        geom_point(aes(t[cells_pred2,2], predict(reg$lo2, data.frame(x.fit = t[cells_pred2,2]))), alpha = 0.4, col = "blue")
     }
     if (legend.show == F){
       plalt <- plalt + theme(legend.position = "none")
     }
-  }
+
   return(res <- list(pl = plalt, reg = reg))
 }
 
@@ -201,7 +211,7 @@ reg_vgam <- function(data,
 
 
 #' @title Plot several genes expression patterns
-#' @name plot_gene
+#' @name plot_multigenes
 #'
 #' @description Tools for visualizing gene signals for sveral ranked genes and display their ranking informations.
 #'
@@ -230,7 +240,7 @@ plot_multigenes <- function(data,
   if (grepl("dtw", ranking@params$method)){method = "dtw"}
   if (grepl("likelihood", ranking@params$method)){method = "lkl"}
   subset.genes <- data.frame(ranking@ranking.df)[subset.genes,]
-  graphs <- lapply(rownames(subset.genes), function(x) plot_gene(gene = x, data = data, MD = MD)$pl +
+  graphs <- lapply(rownames(subset.genes), function(x) reg_loess(gene = x, data = data, MD = MD)$pl +
                      labs(subtitle = paste0(method,".dist: ",round(subset.genes[x,1],1), " | ",method,".rank:", subset.genes[x,2])))
   return(plot_grid(plotlist = graphs, ncol = grid.size[2], nrow = grid.size[1]))
 }

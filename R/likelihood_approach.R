@@ -18,8 +18,11 @@ pval_vgam <- function(data, gene, fam = "gaussian", aic = T){
   v_reg1 <- v_reg$reg$spl1
   v_reg2 <- v_reg$reg$spl2
   v_reg.d <- v_reg$reg$spl.d
-  testStatistic <- -2* (logLik(v_reg.d) - logLik(v_reg2) - logLik(v_reg1))
-  pval <- pchisq(testStatistic, df = (length(coef(v_reg2)) + length(coef(v_reg1)))- length(coef(v_reg.d)))
+  logLik1 <- logLik(v_reg1)
+  logLik2 <- logLik(v_reg2)
+  logLik.d <- logLik(v_reg.d)
+  testStatistic <- 2* (logLik(v_reg2) + logLik(v_reg1) - logLik(v_reg.d))
+  pval <- pchisq(testStatistic, df = df.residual(v_reg.d) - (df.residual(v_reg2) + df.residual(v_reg1)), lower.tail = F)
   if (aic == T){
     aic1 <- AIC(v_reg1) + AIC(v_reg2)
     aic.diff <- AIC(v_reg.d) - aic1
@@ -62,11 +65,21 @@ vgam_rank <- function(data,
   return(res)
 }
 
-
-
-####### Compute alternative and null models and compute their residuals and
-#number of parameters and standard error
-
+#' @title Vgam ranks
+#' @name vgam_rank
+#'
+#' @description compute vgam ranks with likelihood ratio test p-values and aic difference criteria
+#'
+#' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' @param gene character, a gene of interest.
+#' @param fam the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
+#' @param aic logical, if the aic criteria is to be computedor not (default is TRUE).
+#'
+#' @return returns \code{rankingDE} objects: one for the likelihood ratio test pvalues and one for the aic difference criteria if aic == T.
+#'
+#' @import VGAM
+#' @export
+#'
 build_residuals <- function(data, M0 = F){
   n = dim(data$log_counts)[1]
   m = dim(data$log_counts)[2]
@@ -118,8 +131,22 @@ build_residuals <- function(data, M0 = F){
 }
 
 
+#' @title Vgam ranks
+#' @name loess_rank
+#'
+#' @description compute vgam ranks with likelihood ratio test p-values and aic difference criteria
+#'
+#' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' @param gene character, a gene of interest.
+#' @param fam the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
+#' @param aic logical, if the aic criteria is to be computedor not (default is TRUE).
+#'
+#' @return returns \code{rankingDE} objects: one for the likelihood ratio test pvalues and one for the aic difference criteria if aic == T.
+#'
+#' @import VGAM
+#' @export
 ##### Compute statistics based on the Likelihood estimations and a gaussian model
-comp_stats <- function(data, residuals, AIC_pval = T){
+comp_stats <- function(data, gene, fam, aic = T){
   res <- list()
   n <-dim(data$log_counts)[1]
   l1_cells <- names(data$t[!is.na(data$t[,1]),1])

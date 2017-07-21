@@ -4,8 +4,7 @@
 \alias{elbow_curve}
 \title{Elbow curve for a ranking}
 \usage{
-elbow_curve(ranking, xmax = nrow(ranking.df(ranking)), xfit = 0.005 *
-  nrow(ranking.df(ranking)))
+elbow_curve(ranking, xmax = nrow(ranking), xfit = 0.005 * nrow(ranking))
 }
 \arguments{
 \item{ranking}{a \code{rankingDE} object.}
