@@ -113,12 +113,13 @@ compare_rankings <- function(ranking1, ranking2){
 #' @return returns \itemize{\item{a plot of the distances against the ranks of the elements in the ranking.}\item{rank threshold}}
 #'
 #' @export
-elbow_curve <- function(ranking, xmax = nrow(ranking.df(ranking)), xfit = 0.005* nrow(ranking.df(ranking)) ){
+elbow_curve <- function(ranking, xmax = nrow(ranking), xfit = 0.005* nrow(ranking) ){
+  ranking <- ranking.df(ranking)
   x <- seq(1,xmax)
-  y <- as.numeric(ranking$dist[order(-ranking$dist)])[1:xmax]
+  y <- as.numeric(ranking[order(-ranking[,1]),1])[1:xmax]
 
   xfit <- 50
-  y <- as.numeric(ranking$dist[order(-ranking$dist)])[1:xmax]
+  y <- as.numeric(ranking[order(-ranking[,1]),1])[1:xmax]
   d <- ggplot() + geom_point(aes(x = x, y = y)) + xlab("rank of gene") + ylab("dtw distance") + expand_limits(x = 0, y =0)
   tan <- lm(y[1:xfit] ~ x[1:xfit])
   s <-summary(tan)
