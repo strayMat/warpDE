@@ -40,11 +40,11 @@ reg_loess <- function(data,
   y2 <- y[l2_cells]
   t1 <- t[l1_cells,1]
   t2 <- t[l2_cells,2]
-  reg.df1 <- data.frame(y.fit = y1, x.fit = t1, w.fit = w1)
-  reg.df2 <- data.frame(y.fit = y2, x.fit = t2, w.fit = w2)
+  reg.df1 <- data.frame(y.fit = y1, x.fit = t1, w.fit = w1, lineage = rep(1, length(y1)))
+  reg.df2 <- data.frame(y.fit = y2, x.fit = t2, w.fit = w2, lineage = rep(2, length(y2)))
   #time to predict the new data
   t1new <- seq(0, max(t[,1], na.rm = T), length.out = length(l1_cells))
-  t2new <- seq(0,max(t[,2], na.rm = T), length.out = length(l1_cells))
+  t2new <- seq(0,max(t[,2], na.rm = T), length.out = length(l2_cells))
 
   pl <- ggplot() +
     geom_point(aes(t[,2], y), col = "blue", shape = 2, alpha = w[,2], na.rm =T) +
@@ -66,10 +66,14 @@ reg_loess <- function(data,
     if (MD == T){
       # null model
       reg.df.d <- rbind(reg.df1, reg.df2)
-      lod <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df.d)
-      y_pred.d <- predict(lod, data.frame(x.fit = t1new))
-      plalt <- plalt + geom_line(aes(t1new, y_pred.d, colour = "null model"), linetype = 2, na.rm = T)
-      reg$lod = lod
+      lo.alt <- gam(y.fit ~ lineage + lo(x.fit) , weights = w.fit, data = reg.df.d)
+      lo.d <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df.d)
+      y_pred.d <- predict(lo.d, data.frame(x.fit = t1new))
+      y_pred.alt1 <- predict(lo.alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))
+      y_pred.alt2 <- predict(lo.alt, data.frame(x.fit = t2new, lineage = rep(2, length(t2new))))
+      plalt <- plalt + geom_line(aes(t1new, y_pred.d, colour = "null model"), linetype = 2, na.rm = T) + geom_line(aes(t1new, y_pred.alt1, colour = "alt1"), linetype = 2, na.rm = T) + geom_line(aes(t2new, y_pred.alt2, colour = "alt2"), linetype = 2, na.rm = T)
+      reg$lo.d = lo.d
+      reg$lo.alt = lo.alt
     }
 
     }
@@ -148,11 +152,11 @@ reg_vgam <- function(data,
   y2 <- y[l2_cells]
   t1 <- t[l1_cells,1]
   t2 <- t[l2_cells,2]
-  reg.df1 <- data.frame(y.fit = y1, x.fit = t1, w.fit = w1)
-  reg.df2 <- data.frame(y.fit = y2, x.fit = t2, w.fit = w2)
+  reg.df1 <- data.frame(y.fit = y1, x.fit = t1, w.fit = w1, lineage = rep(1, length(y1)))
+  reg.df2 <- data.frame(y.fit = y2, x.fit = t2, w.fit = w2, lineage = rep(2, length(y2)))
   #time to predict the new data
   t1new <- seq(0, max(t[,1], na.rm = T), length.out = length(l1_cells))
-  t2new <- seq(0,max(t[,2], na.rm = T), length.out = length(l1_cells))
+  t2new <- seq(0,max(t[,2], na.rm = T), length.out = length(l2_cells))
 
   pl <- ggplot() +
     geom_point(aes(t2, y2), col = "blue", shape = 2, alpha = w2, na.rm =T) +
@@ -165,13 +169,16 @@ reg_vgam <- function(data,
     #alternative model
     spl1 <- vglm(y.fit ~ sm.ns(x.fit, df =3), family = fam, weights = w.fit, data = reg.df1)
     spl2 <- vglm(y.fit ~ sm.ns(x.fit, df =3), family = fam, weights = w.fit, data = reg.df2)
+    reg <- list(spl1 = spl1, spl2 = spl2)
     if (MD == T){
       # null model
       reg.df.d <- rbind(reg.df1, reg.df2)
       spl.d <- vglm(y.fit ~ sm.ns(x.fit, df = 3), weights = w.fit, family = fam, data = reg.df.d)
-
+      spl.alt <- vglm(y.fit ~ lineage + sm.ns(x.fit, df = 3) + sm.ns(x.fit, df = 3):lineage, family = fam, weights = w.fit, data = reg.df.d)
+    reg$spl.d <- spl.d
+    reg$spl.alt <- spl.alt
     }
-    reg <- list(spl1 = spl1, spl2 = spl2, spl.d = spl.d)
+
     # prediciton at new points and curve plotting
     if (model %in% "negbinomial"){
       y_pred1 <- predict(spl1, data.frame(x.fit = t1new))[,1]
@@ -181,7 +188,11 @@ reg_vgam <- function(data,
     else{
       y_pred1 <- predict(spl1, data.frame(x.fit = t1new))
       y_pred2 <- predict(spl2, data.frame(x.fit = t2new))
-      if (MD == T) {y_pred.d <- predict(spl.d, data.frame(x.fit = t1new))}
+      if (MD == T) {
+        y_pred.d <- predict(spl.d, data.frame(x.fit = t1new))
+        y_pred.alt1 <- predict(spl.alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))
+        y_pred.alt2 <- predict(spl.alt, data.frame(x.fit = t2new, lineage = rep(2, length(t2new))))
+        }
     }
     plalt <- pl +
       geom_line(aes(t1new, y_pred1), color = "red", linetype = 1, na.rm =T) +
@@ -189,7 +200,7 @@ reg_vgam <- function(data,
 
     if (MD == T){
       # null model
-      plalt <- plalt + geom_line(aes(t1new, y_pred.d, col = "null model"), linetype = 2, na.rm =T)
+      plalt <- plalt + geom_line(aes(t1new, y_pred.d, col = "null model"), linetype = 2, na.rm =T)+ geom_line(aes(t1new, y_pred.alt1, colour = "alt1"), linetype = 2, na.rm = T) + geom_line(aes(t2new, y_pred.alt2, colour = "alt2"), linetype = 2, na.rm = T)
     }
     if (npred == T){
       #discard shared cells for new predictions (keep only w >0.5 approximately)
