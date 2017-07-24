@@ -19,20 +19,20 @@
 
 likelihood_criteria <- function(data, gene, reg = "loess", aic = T, span = 0.5, fam = "gaussian"){
   if (reg == "loess"){
-    regs <- reg_loess(data, gene, span = span)
+    regs <- reg_loess(data, gene, span = span)$reg
     method = list(reg = reg, span = span)
+    reg1 <- regs$alt1
+    reg2 <- regs$alt2
   }
   else if (reg == "vgam"){
-    regs <- reg_vgam(data, gene, fam)
+    regs <- reg_vgam(data, gene, fam)$reg
     method <- list(reg = reg, fam = fam)
   }
-  reg1 <- regs$reg[[1]]
-  reg2 <- regs$reg[[2]]
-  reg.d <- regs$reg[[3]]
-  reg.alt <- regs$reg[[4]]
-  testStatistic <- 2* (logLik(reg2)[1] + logLik(reg1)[1] - logLik(reg.d)[1])
-  ############ BIG question here concerning the null model and its degree of freedom
-  pval <- pchisq(testStatistic, df = (df.residual(reg2) + df.residual(reg1)) - df.residual(reg.d), lower.tail = F)
+  reg.d <- regs$null
+  reg.alt <- regs$alt
+  testStatistic <- 2* (logLik(reg.alt)[1] - logLik(reg.d)[1])
+  ############ BIG question here concerning the null model and its degree of freedom################
+  pval <- pchisq(testStatistic, df = 2*df.residual(reg.alt)  - df.residual(reg.d), lower.tail = F)
   res <- list(pval = pval)
   if (aic == T){
     res$aic.diff <- AIC(reg.d) - AIC(reg.alt)
@@ -64,18 +64,17 @@ likelihood_rank <- function(data,
                       ){
   res <- list()
   criteria <- sapply(rownames(data@counts), function(x) likelihood_criteria(data, x, reg))
-  # only one for the p-values which is disturbing for now
   pvalues <- unlist(criteria[1,])
   method <- as.list(unlist(criteria[3,1]))
   ranking_pval <- data.frame(pval = pvalues, rank = length(pvalues) - rank(pvalues) + 1)
   ranking_pval <- ranking_pval[order(ranking_pval$rank),]
-  method$criteria <- "pval"
+  method$method <- "pval"
   res$pval <- new("rankingDE", ranking.df = ranking_pval, params = method)
   if (aic ==T){
     aic <-unlist(criteria[2,])
     ranking_aic <- data.frame(aic.diff = aic, rank = length(aic) - rank(aic) + 1)
     ranking_aic <- ranking_aic[order(ranking_aic$rank),]
-    method$criteria <- "AIC difference"
+    method$method <- "AIC difference"
     res$aic <- new("rankingDE", ranking.df = ranking_aic, params = method)
   }
   return(res)

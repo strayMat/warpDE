@@ -91,29 +91,42 @@ We plot the gene expression profile for the first gene of the dataset: CreER
 The points are colored by lineage: red is the first lineage (GBC and neuronal cells) and blue is the second lineage (sustentacular cells).
 ```{r,fig.height=4, fig.width=6, fig.align="center"}
 gene <- "CreER"
-plot_gene(df, gene, regression = F)
+reg_loess(df, gene, regression = F)
 ```
 We fit a different loess regression for each lineage and one loess regression including both lineages at the same time (the null model). This gives us a representation of the activation pattern for a given gene.
 ```{r,fig.height=4, fig.width=6, fig.align="center"}
-plot_gene(df, gene, legend.show = T)$pl
+gene <- rownames(df@counts)[sample(1:12781,1)]
+reg_vgam(df, gene, legend.show = T)$pl
 ```
 The main goal of the analysis is to find genes which are strongly differrentially expressed between the two reconstructed lineages. In a sense we are searching for branching expression pattern, branching curves uin our visualization.
 ```{r}
-plot_gene(df, 'Ncaph2')$pl 
-plot_gene(df, 'Cyp2g1')$pl 
+reg_vgam(df, 'Ncaph2')$pl 
+reg_vgam(df, 'Cyp2g1')$pl 
 ```
 On the left, we see an unintersting pattern for us, because both genes are expressed similarly in both lineages.
 On the right, we displayed Cyp2g1, a differentially expressed gene similar to the one that we want to detect.
 
 # 3 - Likelihood method
 
+The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function \code{likelihood_rank} computes these values and returns a ranking.
 ```{r}
-ranking <- dtw_rank(df)
-ranking.dtw.t <- ranking
-df.t <- df
-#save(ranking.dtw.t, df.t, file = "/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/tests/test.data.RData")
-plot_multigenes(df.t, ranking.dtw.t, rownames(counts)[1:8], grid.size = c(2,4))
-ranking.dtw.t@ranking.df$
+lkl.rank <- likelihood_rank(df, reg = "vgam")
+aic.ranking <- lkl.rank$aic
+pval.ranking <- lkl.rank$pval
+
+save(aic.ranking, pval.ranking, file = "~/Documents/Berkeley/work_Berkeley/Lineage_TE/rankings/vgam_ranking.aic.RDATA")
+ranking.df(pval.ranking)
+plot_multigenes(df.t, aic.ranking, rownames(ranking.df(aic.ranking))[1:9], grid.size = c(2,4))
+### does not work well; ask sandrine!!!!
+plot_multigenes(df.t, pval.ranking, tail(rownames(ranking.df(pval.ranking)), 9), grid.size = c(2,4))
+
+```
+# 4 - DTW method
+
+Another way to infer differentially expressed genes is to consider the gene counts as time series data. Thus, for each gene we compare the difference between each lineages with the Dynamic Time Warping distance which allows local distorsions of the time axis.
+
+```{r}
+
 ```
 
 
