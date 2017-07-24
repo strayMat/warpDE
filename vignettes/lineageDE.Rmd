@@ -43,6 +43,8 @@ library(RColorBrewer)
 #data("OE_counts")
 setwd("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE")
 load("Data/OE_counts.RData")
+load("tests/test.data.RData")
+load("~/Documents/Berkeley/work_Berkeley/Lineage_TE/rankings/vgam.rank.RDATA")
 ```
 
 We perform a usual transformation with `log(1+x)` and we run PCA as the dimension reduction technique:
@@ -85,6 +87,7 @@ w <- cbind(w1,w2)
 Create a new data object for the analysis with the desired inputs: 
 ```{r}
 df <- new("lineageDEDataSet", counts = counts, t = times, w = w)
+#save(df, file = "~/Documents/Berkeley/work_Berkeley/lineageDE/tests/data_tests.RDATA")
 ```
 
 We plot the gene expression profile for the first gene of the dataset: CreER
@@ -95,8 +98,7 @@ reg_loess(df, gene, regression = F)
 ```
 We fit a different loess regression for each lineage and one loess regression including both lineages at the same time (the null model). This gives us a representation of the activation pattern for a given gene.
 ```{r,fig.height=4, fig.width=6, fig.align="center"}
-gene <- rownames(df@counts)[sample(1:12781,1)]
-reg_vgam(df, gene, legend.show = T)$pl
+reg_loess(df, gene, legend.show = T)$pl
 ```
 The main goal of the analysis is to find genes which are strongly differrentially expressed between the two reconstructed lineages. In a sense we are searching for branching expression pattern, branching curves uin our visualization.
 ```{r}
@@ -114,7 +116,7 @@ lkl.rank <- likelihood_rank(df, reg = "vgam")
 aic.ranking <- lkl.rank$aic
 pval.ranking <- lkl.rank$pval
 
-save(aic.ranking, pval.ranking, file = "~/Documents/Berkeley/work_Berkeley/Lineage_TE/rankings/vgam_ranking.aic.RDATA")
+#save(aic.ranking, pval.ranking, file = "~/Documents/Berkeley/work_Berkeley/Lineage_TE/rankings/vgam.rank.RDATA")
 ranking.df(pval.ranking)
 plot_multigenes(df.t, aic.ranking, rownames(ranking.df(aic.ranking))[1:9], grid.size = c(2,4))
 ### does not work well; ask sandrine!!!!

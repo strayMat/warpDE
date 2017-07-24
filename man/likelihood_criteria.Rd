@@ -4,7 +4,7 @@
 \alias{likelihood_criteria}
 \title{Compute pvalues and aic difference criteria}
 \usage{
-likelihood_criteria(data, gene, reg = "loess", aic = T, span = 0.5,
+likelihood_criteria(data, gene, reg, aic = T, span = 0.5,
   fam = "gaussian")
 }
 \arguments{

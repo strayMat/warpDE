@@ -4,7 +4,8 @@
 \alias{plot_multigenes}
 \title{Plot several genes expression patterns}
 \usage{
-plot_multigenes(data, ranking, subset.genes, MD = F, grid.size = NULL)
+plot_multigenes(data, ranking, subset.genes, null.model = F,
+  grid.size = NULL)
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
@@ -13,7 +14,7 @@ plot_multigenes(data, ranking, subset.genes, MD = F, grid.size = NULL)
 
 \item{subset.genes}{character vector, the names of the genes of interest.}
 
-\item{MD}{logical, if the plot of null model is wanted (default is FALSE).}
+\item{null.model}{logical, if the plot of null model is wanted (default is FALSE).}
 
 \item{grid.size}{2 by 2 vector, for the number of rows and the number of columns that we want for the plot (the size of grid must #' be greater than the number of genes of interest), default is NULL fo a squared grid.}
 }

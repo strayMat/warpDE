@@ -5,7 +5,7 @@
 \title{Plot one gene raw data and its vgam regressions}
 \usage{
 reg_vgam(data, gene, model = "gaussian", regression = T, npred = F,
-  MD = T, legend.show = F)
+  null.model = T, legend.show = F)
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
@@ -18,7 +18,7 @@ reg_vgam(data, gene, model = "gaussian", regression = T, npred = F,
 
 \item{npred}{logical, if the unshared part of the data is to be plotted or not(default is FALSE).}
 
-\item{MD}{logical, if the null model is to be computed and plotted or not (default is TRUE).}
+\item{null.model}{logical, if the null model is to be computed and plotted or not (default is TRUE).}
 
 \item{legend.show}{logical, if the legend is to be shown or not (default is FALSE).}
 }

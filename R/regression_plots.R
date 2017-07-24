@@ -8,7 +8,7 @@
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
 #' @param regression logical, if the loess regression is to be computed and plotted or not (defualt is TRUE).
-#' @param MD logical, if the null model is to be computed and plotted or not (default is TRUE).
+#' @param null.model logical, if the null model is to be computed and plotted or not (default is TRUE).
 #' @param span numeric, a span parameter for the loess regression (default is 0.5).
 #' @param npred logical, if the unshared part of the data is to be plotted or not(default is FALSE).
 #' @param sd.show logical, if the plot of standard deviation is wanted (default is FALSE).
@@ -19,12 +19,12 @@
 #' @import ggplot2
 #'
 #' @importFrom msir loess.sd
-#' @import glm
+#' @import gam
 #' @export
 reg_loess <- function(data,
                       gene,
                       regression = T,
-                      MD = T,
+                      null.model = T,
                       span = 0.5,
                       npred = F,
                       sd.show = F,
@@ -44,9 +44,8 @@ reg_loess <- function(data,
   reg.df1 <- data.frame(y.fit = y1, x.fit = t1, w.fit = w1, lineage = rep(1, length(y1)))
   reg.df2 <- data.frame(y.fit = y2, x.fit = t2, w.fit = w2, lineage = rep(2, length(y2)))
   #time to predict the new data
-  t1new <- seq(0, max(t[,1], na.rm = T), length.out = length(l1_cells))
-  t2new <- seq(0,max(t[,2], na.rm = T), length.out = length(l2_cells))
-
+  t1new <- seq(0, max(t1), length.out = length(l1_cells))
+  t2new <- seq(0,max(t2), length.out = length(l2_cells))
   pl <- ggplot() +
     geom_point(aes(t2, y2), col = "#377EB8", alpha = w2, shape = 1) +
     geom_point(aes(t1, y1), col = "#E41A1C", alpha = w1, shape = 1) +
@@ -56,26 +55,19 @@ reg_loess <- function(data,
     return(pl)
   }
   else{
-    lo1 <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df1)
-    lo2 <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df2)
-    y_pred1 <- predict(lo1, data.frame(x.fit = t1new))
-    y_pred2 <- predict(lo2, data.frame(x.fit = t2new))
-    plalt <- pl +
-      geom_line(aes(t1new, y_pred1), color = "#E41A1C", linetype = 1, na.rm =T) +
-      geom_line(aes(t2new, y_pred2), color = "#377EB8", linetype = 1, na.rm =T)
-      reg <- list(alt1 = lo1, alt2 = lo2)
-    if (MD == T){
+    reg.df.d <- rbind(reg.df1, reg.df2)
+    lo.alt <- gam(y.fit ~ lineage + lo(x.fit, span = span) + lo(x.fit, span = span):lineage , weights = w.fit, data = reg.df.d)
+    y_pred.alt1 <- predict(lo.alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))
+    y_pred.alt2 <- predict(lo.alt, data.frame(x.fit = t2new, lineage = rep(2, length(t2new))))
+
+    plalt <- pl + geom_line(aes(t1new, y_pred.alt1), col = "#E41A1C") + geom_line(aes(t2new, y_pred.alt2), col = "#377EB8")
+      reg <- list(alt = lo.alt)
+    if (null.model == T){
       # null model
-      reg.df.d <- rbind(reg.df1, reg.df2)
-      lo.alt <- gam(y.fit ~ lineage + lo(x.fit) + lo(x.fit):lineage , weights = w.fit, data = reg.df.d)
       lo.d <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df.d)
       y_pred.d <- predict(lo.d, data.frame(x.fit = t1new))
-      y_pred.alt1 <- predict(lo.alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))
-      y_pred.alt2 <- predict(lo.alt, data.frame(x.fit = t2new, lineage = rep(2, length(t2new))))
-      plalt <- plalt + geom_line(aes(t1new, y_pred.d, colour = "null model"), linetype = 2, na.rm = T) + geom_line(aes(t1new, y_pred.alt1, colour = "alt1"), linetype = 2, na.rm = T) + geom_line(aes(t2new, y_pred.alt2, colour = "alt2"), linetype = 2, na.rm = T)
-
+      plalt <- plalt + geom_line(aes(t1new, y_pred.d, colour = "null model"), linetype = 2, na.rm = T)
       reg$null = lo.d
-      reg$alt = lo.alt
     }
 
     }
@@ -115,7 +107,7 @@ reg_loess <- function(data,
 #' @param model which disrtibution assumption is made on the residuals; either "negbinomial" or  gausian (default is gaussian).
 #' @param regression logical, if the loess regression is to be computed and plotted or not (default is TRUE).
 #' @param npred logical, if the unshared part of the data is to be plotted or not(default is FALSE).
-#' @param MD logical, if the null model is to be computed and plotted or not (default is TRUE).
+#' @param null.model logical, if the null model is to be computed and plotted or not (default is TRUE).
 #' @param legend.show logical, if the legend is to be shown or not (default is FALSE).
 #'
 #' @return returns \itemize{\item{\code{pl},the visualization of the data}
@@ -123,7 +115,6 @@ reg_loess <- function(data,
 #'
 #' @import ggplot2
 #' @import VGAM
-#' @imort RColorBrewer
 #' @export
 
 reg_vgam <- function(data,
@@ -131,7 +122,7 @@ reg_vgam <- function(data,
                      model = "gaussian",
                      regression = T,
                      npred = F,
-                     MD = T,
+                     null.model = T,
                      legend.show = F){
   # choice of the model
   if (model %in% "negbinomial"){
@@ -172,7 +163,7 @@ reg_vgam <- function(data,
     reg.df.d <- rbind(reg.df1, reg.df2)
     spl.alt <- vglm(y.fit ~ lineage + sm.ns(x.fit, df = 3) + sm.ns(x.fit, df = 3):lineage, family = fam, weights = w.fit, data = reg.df.d)
     reg <- list(alt = spl.alt)
-    if (MD == T){
+    if (null.model == T){
       # null model
       spl.d <- vglm(y.fit ~ sm.ns(x.fit, df = 3), weights = w.fit, family = fam, data = reg.df.d)
       reg$null <- spl.d
@@ -181,19 +172,19 @@ reg_vgam <- function(data,
     if (model %in% "negbinomial"){
       y_pred.alt1 <- predict(spl.alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))[,1]
       y_pred.alt2 <- predict(spl.alt, data.frame(x.fit = t2new, lineage = rep(2, length(t2new))))[,1]
-      if (MD ==T){
+      if (null.model ==T){
         y_pred.d <- predict(spl.d, data.frame(x.fit = t1new))[,1]
         }
     }
     else{
       y_pred.alt1 <- predict(spl.alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))
       y_pred.alt2 <- predict(spl.alt, data.frame(x.fit = t2new, lineage = rep(2, length(t2new))))
-      if (MD == T) {
+      if (null.model == T) {
         y_pred.d <- predict(spl.d, data.frame(x.fit = t1new))
         }
     }
     plalt <- pl + geom_line(aes(t1new, y_pred.alt1), col = "#E41A1C") + geom_line(aes(t2new, y_pred.alt2), col = "#377EB8" )
-    if (MD == T){
+    if (null.model == T){
       # null model
       plalt <- plalt + geom_line(aes(t1new, y_pred.d, col = "null model"), linetype = 2, na.rm =T)
     }
@@ -224,7 +215,7 @@ reg_vgam <- function(data,
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param ranking a \code{rankingDE} object, rankings rows of the genes of interest in the ranking dataframe.
 #' @param subset.genes character vector, the names of the genes of interest.
-#' @param MD logical, if the plot of null model is wanted (default is FALSE).
+#' @param null.model logical, if the plot of null model is wanted (default is FALSE).
 #' @param grid.size 2 by 2 vector, for the number of rows and the number of columns that we want for the plot (the size of grid must #' be greater than the number of genes of interest), default is NULL fo a squared grid.
 #' @return a visualization of the genes of interest.
 #'
@@ -235,7 +226,7 @@ reg_vgam <- function(data,
 plot_multigenes <- function(data,
                             ranking,
                             subset.genes,
-                            MD = F,
+                            null.model = F,
                             grid.size = NULL
 ){
   if (is.null(grid.size)){
@@ -247,8 +238,51 @@ plot_multigenes <- function(data,
   if (grepl("pval", ranking@params$method)){method = "lkl"}
   if (grepl("AIC", ranking@params$method)){method = "aic"}
   subset.genes <- data.frame(ranking@ranking.df)[subset.genes,]
-  graphs <- lapply(rownames(subset.genes), function(x) reg_loess(gene = x, data = data, MD = MD)$pl +
+  graphs <- lapply(rownames(subset.genes), function(x) reg_loess(gene = x, data = data, null.model = null.model)$pl +
                      labs(subtitle = paste0(method,".dist: ",round(subset.genes[x,1],1), " | ",method,".rank:", subset.genes[x,2])))
   return(plot_grid(plotlist = graphs, ncol = grid.size[2], nrow = grid.size[1]))
 }
 
+
+#' @title Differential Expression analysis according with time
+#' @name timeDE
+#'
+#' @description Tools for visualizing gene signals in time for one lineage analysis.
+#'
+#' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' @param gene character, a gene of interest.
+#' @param lineage integer, if working with multi lineages data, it sspecifies the lineage of interest).
+
+#'
+#' @return returns \itemize{\item{\code{pl},the visualization of the data}
+#' \item{\code{reg}, the regression objects for the lineage of interest and the null model (flat line).}}
+#'
+#' @import ggplot2
+#'
+#' @import gam
+#' @export
+timeDE <- function(data,
+                   gene,
+                   lineage,
+                   span = 0.5){
+  t = data@t
+  w = data@w
+  y = log1p(data@counts[gene,])
+  # discard NAS from analysis
+  w <- w[w[,lineage]!=0,lineage]
+  l_cells <- names(w)
+  y <- y[l_cells]
+  t <- t[l_cells,lineage]
+  reg.df <- data.frame(y.fit = y, x.fit = t, w.fit = w)
+  #time to predict the new data
+  tnew <- seq(0, max(t), length.out = length(l_cells))
+  pl <- ggplot() +
+    geom_point(aes(t, y), shape = 1, alpha = w) + ggtitle(gene, "single lineage DE") +
+    coord_cartesian(ylim=c(-1.5,10))+ xlab("times") + ylab("logcounts")
+  alt <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df)
+  null <- mean(y)
+  reg <- list(alt = alt, null = null)
+  y_pred.alt <- predict(alt, data.frame(x.fit = tnew))
+  plalt <- pl + geom_line(aes(tnew, y_pred.alt), col = "#E41A1C") + geom_hline(yintercept = null, col = "#377EB8")
+  return(list(pl = plalt, reg = reg, pval = summary(reg$alt)[4][[1]][1, 5]))
+}

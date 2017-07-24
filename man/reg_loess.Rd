@@ -4,8 +4,8 @@
 \alias{reg_loess}
 \title{Plot one gene raw data and its loess regressions}
 \usage{
-reg_loess(data, gene, regression = T, MD = T, span = 0.5, npred = F,
-  sd.show = F, legend.show = F)
+reg_loess(data, gene, regression = T, null.model = T, span = 0.5,
+  npred = F, sd.show = F, legend.show = F)
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
@@ -14,7 +14,7 @@ reg_loess(data, gene, regression = T, MD = T, span = 0.5, npred = F,
 
 \item{regression}{logical, if the loess regression is to be computed and plotted or not (defualt is TRUE).}
 
-\item{MD}{logical, if the null model is to be computed and plotted or not (default is TRUE).}
+\item{null.model}{logical, if the null model is to be computed and plotted or not (default is TRUE).}
 
 \item{span}{numeric, a span parameter for the loess regression (default is 0.5).}
 
