@@ -37,6 +37,7 @@ dtw_rank <- function(data,
   for (g in 1:n){
     gene <- rownames(logCounts)[g]
     y <- logCounts[g, ]
+    ##### change for same framework as likelihood methods and allow for a choice between loess and splines
     lo1 <- loess(y ~ t[,1], weights = w[,1], span = 0.75)
     lo2 <- loess(y ~ t[,2], weights = w[,2], span = 0.75)
     y1new <- predict(lo1, t[cells_pred1,1])
@@ -57,8 +58,6 @@ dtw_rank <- function(data,
   result <- new("rankingDE", ranking.df = dtw_ranking, params = list(method = "dtw_basic", window.size = window.size, dtw.norm = norm))
   return(result)
 }
-
-
 
 
 # Bootstraps over cells : for confidence interval and sd

@@ -234,12 +234,20 @@ plot_multigenes <- function(data,
     grid.size <- c(c,c)
   }
   method = ""
-  if (grepl("dtw", ranking@params$method)){method = "dtw"}
-  if (grepl("pval", ranking@params$method)){method = "lkl"}
-  if (grepl("AIC", ranking@params$method)){method = "aic"}
+  reg = ""
+  if (grepl("dtw", ranking@params$method)){
+    method = "dtw"
+  }
+  if (grepl("pval", ranking@params$method)){
+    method = "lkl"
+    reg = ranking@params$reg
+  }
+  if (grepl("AIC", ranking@params$method)){
+    method = "aic"
+    reg = ranking@params$reg
+  }
   subset.genes <- data.frame(ranking@ranking.df)[subset.genes,]
-  graphs <- lapply(rownames(subset.genes), function(x) reg_loess(gene = x, data = data, null.model = null.model)$pl +
-                     labs(subtitle = paste0(method,".dist: ",round(subset.genes[x,1],1), " | ",method,".rank:", subset.genes[x,2])))
+  graphs <- lapply(rownames(subset.genes), function(x) reg_loess(gene = x, data = data, null.model = null.model)$pl + labs(subtitle = paste0(reg, ": ", method,".dist: ",round(subset.genes[x,1],1), " | ",method,".rank:", subset.genes[x,2])))
   return(plot_grid(plotlist = graphs, ncol = grid.size[2], nrow = grid.size[1]))
 }
 

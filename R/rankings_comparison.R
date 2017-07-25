@@ -16,6 +16,12 @@
 quantiles_shared <- function(ranking1, ranking2, quantiles = c(0.01,seq(0.05,1, length.out = 20)), nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
   method1 <- params(ranking1)$method
   method2 <- params(ranking2)$method
+  if (!is.null(params(ranking1)$reg)){
+    method1 <- paste(method1, (params(ranking1)$reg))
+  }
+  if (!is.null(params(ranking2)$reg)){
+    method2 <- paste(method2, (params(ranking2)$reg))
+  }
   ranking1 <- ranking.df(ranking1)
   ranking2 <- ranking.df(ranking2)
   best1 <- ranking1[order(ranking1[,2]),]
@@ -47,6 +53,12 @@ quantiles_shared <- function(ranking1, ranking2, quantiles = c(0.01,seq(0.05,1, 
 plot_rankings <- function(ranking1, ranking2, nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
   xlab <- params(ranking1)$method
   ylab <- params(ranking2)$method
+  if (!is.null(params(ranking1)$reg)){
+    xlab <- paste(xlab, (params(ranking1)$reg))
+  }
+  if (!is.null(params(ranking2)$reg)){
+    ylab <- paste(ylab, (params(ranking2)$reg))
+  }
   ranking1 <- ranking.df(ranking1)
   ranking2 <- ranking.df(ranking2)
   ranking1 <- ranking1[ranking1[,2]<nmax,]
