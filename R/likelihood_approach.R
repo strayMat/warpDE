@@ -26,14 +26,14 @@ likelihood_criteria <- function(data, gene, reg, aic = T, span = 0.5, fam = "gau
     regs <- reg_vgam(data, gene, fam)$reg
     method <- list(reg = reg, fam = fam)
   }
-  reg.d <- regs$null
+  reg.null <- regs$null
   reg.alt <- regs$alt
-  testStatistic <- 2* (logLik(reg.alt)[1] - logLik(reg.d)[1])
+  testStatistic <- 2* (logLik(reg.alt)[1] - logLik(reg.null)[1])
   ############ BIG question here concerning the null model and its degree of freedom################
-  pval <- pchisq(testStatistic, df = 2*df.residual(reg.alt)  - df.residual(reg.d), lower.tail = F)
+  pval <- pchisq(testStatistic, df = df.residual(reg.null) - df.residual(reg.alt) , lower.tail = F)
   res <- list(pval = pval)
   if (aic == T){
-    res$aic.diff <- AIC(reg.d) - AIC(reg.alt)
+    res$aic.diff <- AIC(reg.null) - AIC(reg.alt)
   }
   res$method <- method
   return(res)

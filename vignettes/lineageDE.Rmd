@@ -14,7 +14,7 @@ link-citations: true
 ---
 
 ```{r setup, include = F}
-knitr::opts_chunk$set(cache=TRUE, message = F, fig.show = "hold")
+knitr::opts_chunk$set(cache=TRUE, message = F, warning = F, fig.height=4, fig.width=6, fig.align="center")
 library(ggplot2)
 theme_update(plot.title = element_text(hjust = 0.5))
 ```
@@ -33,7 +33,7 @@ This vignette will use the data from [@Fletcher2017] of Olfactory Epithelium cel
 
 Before searching for differentially expressed genes between lineages, we have to preprocess the data and run slingshot on it. We use data from [@Fletcher2017], which is already filtered and normalized with [Scone](https://github.com/YosefLab/scone) . Scone tries different normalization techniques, batch or technical effects removal methods and provides tools to rank this different normalizations.
 
-We load this data from the package [lineageDE](https://github.com/strayMat/lineageDE) which contains also the different functions that we use in this study. We also load the package [slingshot](https://github.com/kstreet13/slingshot) [@Street2017] which allow us to perform the lineage inferrence.
+We load this data from the package [lineageDE](https://github.com/strayMat/lineageDE) which contains also the different functions that we use in this study. We also load the package [slingshot](https://github.com/kstreet13/slingshot) [@Street2017] which allows us to perform the lineage inferrence.
 
 ```{r}
 library(lineageDE)
@@ -43,8 +43,6 @@ library(RColorBrewer)
 #data("OE_counts")
 setwd("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE")
 load("Data/OE_counts.RData")
-load("tests/test.data.RData")
-load("~/Documents/Berkeley/work_Berkeley/Lineage_TE/rankings/vgam.rank.RDATA")
 ```
 
 We perform a usual transformation with `log(1+x)` and we run PCA as the dimension reduction technique:
@@ -72,7 +70,7 @@ for(c in curves(slrun)){
 title("View of the first two Pcs of the data with principal curves")
 ```
 
-Then, we store the slingshot outputs for our future DE analysis:
+Then, we store the slingshot outputs for our future DE analysis, and create a new data objects with the desired inputs:
 ```{r}
 times <- pseudotime(slrun)
 weights <- curveWeights(slrun)
@@ -80,15 +78,10 @@ weights <- curveWeights(slrun)
 w1 <- weights[,1]/(weights[,1] + weights[,2])
 w2 <- weights[,2]/(weights[,1] + weights[,2])
 w <- cbind(w1,w2)
+df <- new("lineageDEDataSet", counts = counts, t = times, w = w)
 ```
 
 # 2 - Visualization of the data
-
-Create a new data object for the analysis with the desired inputs: 
-```{r}
-df <- new("lineageDEDataSet", counts = counts, t = times, w = w)
-#save(df, file = "~/Documents/Berkeley/work_Berkeley/lineageDE/tests/data_tests.RDATA")
-```
 
 We plot the gene expression profile for the first gene of the dataset: CreER
 The points are colored by lineage: red is the first lineage (GBC and neuronal cells) and blue is the second lineage (sustentacular cells).
@@ -96,41 +89,83 @@ The points are colored by lineage: red is the first lineage (GBC and neuronal ce
 gene <- "CreER"
 reg_loess(df, gene, regression = F)
 ```
+
 We fit a different loess regression for each lineage and one loess regression including both lineages at the same time (the null model). This gives us a representation of the activation pattern for a given gene.
 ```{r,fig.height=4, fig.width=6, fig.align="center"}
 reg_loess(df, gene, legend.show = T)$pl
 ```
+
 The main goal of the analysis is to find genes which are strongly differrentially expressed between the two reconstructed lineages. In a sense we are searching for branching expression pattern, branching curves uin our visualization.
-```{r}
+```{r, fig.show = "hold"}
 reg_vgam(df, 'Ncaph2')$pl 
 reg_vgam(df, 'Cyp2g1')$pl 
 ```
+
 On the left, we see an unintersting pattern for us, because both genes are expressed similarly in both lineages.
 On the right, we displayed Cyp2g1, a differentially expressed gene similar to the one that we want to detect.
 
 # 3 - Likelihood method
 
-The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function \code{likelihood_rank} computes these values and returns a ranking.
-```{r}
-lkl.rank <- likelihood_rank(df, reg = "vgam")
-aic.ranking <- lkl.rank$aic
-pval.ranking <- lkl.rank$pval
+```{r, include = F, echo = F}
+# load ranking instead of computing them in order to gain time for knit (from 30 min to 2 min)
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/vgam.rank.RDATA")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/loess.rank.RDATA")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/euclidean.ranking.RDATA")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/dtw.rankings.RDATA")
+```
 
-#save(aic.ranking, pval.ranking, file = "~/Documents/Berkeley/work_Berkeley/Lineage_TE/rankings/vgam.rank.RDATA")
-ranking.df(pval.ranking)
-plot_multigenes(df.t, aic.ranking, rownames(ranking.df(aic.ranking))[1:9], grid.size = c(2,4))
-### does not work well; ask sandrine!!!!
-plot_multigenes(df.t, pval.ranking, tail(rownames(ranking.df(pval.ranking)), 9), grid.size = c(2,4))
+The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function \code{likelihood_rank} computes these values and returns a ranking. This ranking function takes a few minutes to run.
+```{r, include = T, eval = F}
+lkl.rank <- likelihood_rank(df, reg = "vgam")
+vgam.aic.ranking <- lkl.rank$aic
+vgam.pval.ranking <- lkl.rank$pval
+```
+
+```{r}
+plot_multigenes(df, vgam.aic.ranking, rownames(ranking.df(vgam.aic.ranking))[1:9], grid.size = c(2,4))
+plot_multigenes(df, vgam.pval.ranking, rownames(ranking.df(vgam.pval.ranking))[1:9], grid.size = c(2,4))
 
 ```
+
 # 4 - DTW method
 
 Another way to infer differentially expressed genes is to consider the gene counts as time series data. Thus, for each gene we compare the difference between each lineages with the Dynamic Time Warping distance which allows local distorsions of the time axis.
 
+```{r, include = T, eval = F}
+dtw.ranking <- dtw_rank(df)
+```
+
+```{r}
+plot_multigenes(df, dtw.ranking, rownames(ranking.df(dtw.ranking))[1:9], grid.size = c(2,4))
+```
+
+# 5 - Compare different rankings of genes
+
+## One versus one comparison 
+You can compare two rankings with the `compare_rankings` function which wrapps three different comparison:
+- A scatter plot of both lineages;
+- A comparison of the shared elements in the differents quantiles of the two rankings
+- A measure of the [Kendall's tau](https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient) between the two rankings (a measure of the number of concordant and discordant permutations of ranks). 
+```{r}
+dtw_vgam <- compare_rankings(dtw.ranking, vgam.aic.ranking)
+dtw_vgam$pl
+dtw_vgam$quantiles.shared
+dtw_vgam$kendall.tau
+```
+
+## Multiple comparisons
+
+We provided `kendall.heatmap` a quick visualization for multiple rank comparisons:
+
+```{r}
+kendall.heatmap(list(vgam.aic.ranking, lo.aic.ranking, dtw.ranking,euclidean.ranking))
+```
+# Explore one particular ranking
+
+We
 ```{r}
 
 ```
-
 
 ## Styles
 

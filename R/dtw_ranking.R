@@ -4,6 +4,7 @@
 #' @description
 #'
 #' @param data a \code{lineageDEDataSet} with genes to be ranked.
+#' @param reg a character, ("splines" or "loess") , to choose which regression to predict with before computing the dtw distance (default is "splines").
 #' @param norm  character,("L2" or "L1") the norm to be used for the dtw distance (default is "L2")
 #' @param window.size integer, the size of the warping window (default is NULL, no window.size), see details.
 #' @param nb.prediction.points integer, if we want to specify the same number of points for each lineage to compute the dtw distance with (default is NULL, we use all points available in each lineage).
@@ -14,6 +15,7 @@
 #' @importFrom dtwclust dtw_basic
 #' @export
 dtw_rank <- function(data,
+                     reg = "splines",
                      norm ="L2",
                      window.size = NULL,
                      equal.size = NULL,
@@ -37,13 +39,24 @@ dtw_rank <- function(data,
   for (g in 1:n){
     gene <- rownames(logCounts)[g]
     y <- logCounts[g, ]
-    ##### change for same framework as likelihood methods and allow for a choice between loess and splines
-    lo1 <- loess(y ~ t[,1], weights = w[,1], span = 0.75)
-    lo2 <- loess(y ~ t[,2], weights = w[,2], span = 0.75)
-    y1new <- predict(lo1, t[cells_pred1,1])
-    y1new <- y1new[order(t[cells_pred1,1])]
-    y2new <- predict(lo2, t[cells_pred2,2])
-    y2new <- y2new[order(t[cells_pred2,2])]
+
+    if (reg = "splines"){
+      reg.alt <- reg_vgam(data, gene, null.model = F)$reg$alt
+      y1new <- predict(reg.alt, data.frame(x.fit = t[cells_pred1,1], lineage = rep(1, length(cells_pred1))))
+      y1new <- y1new[order(t[cells_pred1,1])]
+      y2new <- predict(reg.alt, data.frame(x.fit = t[cells_pred2,2], lineage = rep(2, length(cells_pred2))))
+      y2new <- y2new[order(t[cells_pred2,2])]
+    }
+
+    if (reg = "loess"){
+      reg.alt <- reg_loess(data, gene, null.model = F)$reg$alt
+      y1new <- predict(reg.alt, data.frame(x.fit = t[cells_pred1,1], lineage = rep(1, length(cells_pred1))))
+      y1new <- y1new[order(t[cells_pred1,1])]
+      y2new <- predict(reg.alt, data.frame(x.fit = t[cells_pred2,2], lineage = rep(2, length(cells_pred2))))
+      y2new <- y2new[order(t[cells_pred2,2])]
+    }
+
+
     if (Zscore == T){
       y1new <- zscore(y1new)
       y2new <- zscore(y2new)
