@@ -142,6 +142,7 @@ plot_multigenes(df, dtw.ranking, rownames(ranking.df(dtw.ranking))[1:9], grid.si
 # 5 - Compare different rankings of genes
 
 ## One versus one comparison 
+
 You can compare two rankings with the `compare_rankings` function which wrapps three different comparison:
 - A scatter plot of both lineages;
 - A comparison of the shared elements in the differents quantiles of the two rankings
@@ -156,15 +157,15 @@ dtw_vgam$kendall.tau
 ## Multiple comparisons
 
 We provided `kendall.heatmap` a quick visualization for multiple rank comparisons:
-
 ```{r}
 kendall.heatmap(list(vgam.aic.ranking, lo.aic.ranking, dtw.ranking,euclidean.ranking))
 ```
+
 # Explore one particular ranking
 
-We
+We also created an visualization of the distribution of the distances used for ranking genes. We plot this as an Elbow curve, which point at a hard threshold for differentially expressed genes based on this distribution.
 ```{r}
-
+elbow_curve(vgam.aic.ranking)
 ```
 
 ## Styles

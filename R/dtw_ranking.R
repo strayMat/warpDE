@@ -40,7 +40,7 @@ dtw_rank <- function(data,
     gene <- rownames(logCounts)[g]
     y <- logCounts[g, ]
 
-    if (reg = "splines"){
+    if (reg == "splines"){
       reg.alt <- reg_vgam(data, gene, null.model = F)$reg$alt
       y1new <- predict(reg.alt, data.frame(x.fit = t[cells_pred1,1], lineage = rep(1, length(cells_pred1))))
       y1new <- y1new[order(t[cells_pred1,1])]
@@ -48,7 +48,7 @@ dtw_rank <- function(data,
       y2new <- y2new[order(t[cells_pred2,2])]
     }
 
-    if (reg = "loess"){
+    if (reg == "loess"){
       reg.alt <- reg_loess(data, gene, null.model = F)$reg$alt
       y1new <- predict(reg.alt, data.frame(x.fit = t[cells_pred1,1], lineage = rep(1, length(cells_pred1))))
       y1new <- y1new[order(t[cells_pred1,1])]

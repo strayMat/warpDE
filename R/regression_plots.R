@@ -1,34 +1,40 @@
 ## Individual gene plots with loess
-## reg_loess
-#' @title Plot one gene raw data and its loess regressions
-#' @name reg_loess
+## reg_gam
+#' @title Plot one gene raw data and its regressions
+#' @name reg_gam
 #'
-#' @description Tools for visualizing gene signals for one given gene.
+#' @description Tools for visualizing gene signals for one given gene with the gam framework.
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
-#' @param regression logical, if the loess regression is to be computed and plotted or not (defualt is TRUE).
+#' @param reg a function to perform regression, either "loess" or "n.splines".
+#' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
+#' @param df numeric, a smoothing parameter for the splines regregression (default is 3, see \code{gam::ns} for details about regularization).
+#' @param regression logical, if the loess regression is to be computed and plotted or not (default is TRUE).
 #' @param null.model logical, if the null model is to be computed and plotted or not (default is TRUE).
-#' @param span numeric, a span parameter for the loess regression (default is 0.5).
 #' @param npred logical, if the unshared part of the data is to be plotted or not(default is FALSE).
 #' @param sd.show logical, if the plot of standard deviation is wanted (default is FALSE).
+#' @param legend.show logical, if the legend is wanted (default is FALSE).
 #'
 #' @return returns \itemize{\item{\code{pl},the visualization of the data}
 #' \item{\code{reg}, the regression objects for both lineages and the null model.}}
 #'
 #' @import ggplot2
-#'
 #' @importFrom msir loess.sd
+#' @importFrom splines ns
 #' @import gam
 #' @export
-reg_loess <- function(data,
-                      gene,
-                      regression = T,
-                      null.model = T,
-                      span = 0.5,
-                      npred = F,
-                      sd.show = F,
-                      legend.show = F){
+reg_gam <- function(data,
+                    gene,
+                    reg,
+                    span = 0.75,
+                    df = 3,
+                    regression = T,
+                    null.model = T,
+                    npred = F,
+                    sd.show = F,
+                    legend.show = F,
+                    ...){
   t = data@t
   w = data@w
   y = log1p(data@counts[gene,])
@@ -49,35 +55,44 @@ reg_loess <- function(data,
   pl <- ggplot() +
     geom_point(aes(t2, y2), col = "#377EB8", alpha = w2, shape = 1) +
     geom_point(aes(t1, y1), col = "#E41A1C", alpha = w1, shape = 1) +
-    ggtitle(gene, "loess regression") + coord_cartesian(ylim=c(-1.5,10))+ xlab("times") + ylab("logcounts")
-
+    ggtitle(gene, paste(reg, "regression")) + coord_cartesian(ylim=c(-1.5,10))+ xlab("times") + ylab("logcounts")
   if (regression == F){
     return(pl)
   }
   else{
     reg.df.d <- rbind(reg.df1, reg.df2)
-    lo.alt <- gam(y.fit ~ lineage + lo(x.fit, span = span) + lo(x.fit, span = span):lineage , weights = w.fit, data = reg.df.d)
-    y_pred.alt1 <- predict(lo.alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))
-    y_pred.alt2 <- predict(lo.alt, data.frame(x.fit = t2new, lineage = rep(2, length(t2new))))
+    if (reg == "loess"){
+      alt <- gam(y.fit ~ lineage + lo(x.fit, span = span) + lo(x.fit, span = span):lineage , weights = w.fit, data = reg.df.d)
+    }
+    else if (reg == "n.splines"){
+      alt <- gam(y.fit ~ lineage + ns(x.fit, df = df) + ns(x.fit, df = df):lineage , weights = w.fit, data = reg.df.d)
+    }
+    y_pred.alt1 <- predict(alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))
+    y_pred.alt2 <- predict(alt, data.frame(x.fit = t2new, lineage = rep(2, length(t2new))))
 
     plalt <- pl + geom_line(aes(t1new, y_pred.alt1), col = "#E41A1C") + geom_line(aes(t2new, y_pred.alt2), col = "#377EB8")
-      reg <- list(alt = lo.alt)
+      reg <- list(alt = alt)
     if (null.model == T){
       # null model
-      lo.d <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df.d)
-      y_pred.d <- predict(lo.d, data.frame(x.fit = t1new))
-      plalt <- plalt + geom_line(aes(t1new, y_pred.d, colour = "null model"), linetype = 2, na.rm = T)
-      reg$null = lo.d
+      if (reg == "loess"){
+        null <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df.d)
+      }
+      else if (reg == "n.splines"){
+        null <- gam(y.fit ~ ns(x.fit, df = df), weights = w.fit, data = reg.df.d)
+      }
+      y_pred.null <- predict(null, data.frame(x.fit = t1new))
+      plalt <- plalt + geom_line(aes(t1new, y_pred.null, colour = "null model"), linetype = 2, na.rm = T)
+      reg$null = null
     }
-
     }
     if (sd.show == T){
-      ## confidence intervals:
-      se1 <- loess.sd(x = t[,1], y = y, weights = w[,1], span = span, nsigma = 1, na.action = na.exclude)
-      se2 <- loess.sd(x = t[,2], y = y, weights = w[,2], span = span, nsigma = 1, na.action = na.exclude)
-
-      plalt <- plalt + geom_ribbon(aes(x = se1$x, ymin = se1$lower, ymax = se1$upper), alpha = 0.2, fill = "#E41A1C") +
-        geom_ribbon(aes(x = se2$x, ymin = se2$lower, ymax = se2$upper), alpha = 0.2, fill = "#377EB8")
+      #TO ADD
+      # ## confidence intervals:
+      # se1 <- loess.sd(x = t[,1], y = y, weights = w[,1], nsigma = 1, na.action = na.exclude)
+      # se2 <- loess.sd(x = t[,2], y = y, weights = w[,2], nsigma = 1, na.action = na.exclude)
+      #
+      # plalt <- plalt + geom_ribbon(aes(x = se1$x, ymin = se1$lower, ymax = se1$upper), alpha = 0.2, fill = "#E41A1C") +
+      #   geom_ribbon(aes(x = se2$x, ymin = se2$lower, ymax = se2$upper), alpha = 0.2, fill = "#377EB8")
     }
     if (npred == T){
       #discard unappropriate cells for new predictions (keep only w >0.5 approximately)
@@ -85,8 +100,8 @@ reg_loess <- function(data,
       middle_w2 <- w[w[,2]!=0 & w[,2]!=1,2]
       cells_pred1 <- names(w[w[,1] > (0.5 + sd(middle_w1)),1])
       cells_pred2 <- names(w[w[,2] > (0.5 + sd(middle_w2)),2])
-      plalt <- plalt + geom_point(aes(t[cells_pred1,1], predict(reg$alt1, data.frame(x.fit = t[cells_pred1,1]))), alpha = 0.4, col = "#E41A1C", size = 1)+
-        geom_point(aes(t[cells_pred2,2], predict(reg$alt2, data.frame(x.fit = t[cells_pred2,2]))), alpha = 0.4, col = "#377EB8", size = 1)
+      plalt <- plalt + geom_point(aes(t[cells_pred1,1], predict(reg$alt, data.frame(x.fit = t[cells_pred1,1], lineage = rep(1, length(cells_pred1))))), alpha = 0.4, col = "#E41A1C", size = 1)+
+        geom_point(aes(t[cells_pred2,2], predict(reg$alt, data.frame(x.fit = t[cells_pred2,2], lineage = rep(2, length(cells_pred2))))), alpha = 0.4, col = "#377EB8", size = 1)
     }
     if (legend.show == F){
       plalt <- plalt + theme(legend.position = "none")
