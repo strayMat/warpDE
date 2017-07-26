@@ -4,8 +4,8 @@
 \alias{plot_multigenes}
 \title{Plot several genes expression patterns}
 \usage{
-plot_multigenes(data, ranking, subset.genes, null.model = F,
-  grid.size = NULL)
+plot_multigenes(data, ranking, subset.genes, reg.f = "n.splines",
+  null.model = F, grid.size = NULL)
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
@@ -13,6 +13,8 @@ plot_multigenes(data, ranking, subset.genes, null.model = F,
 \item{ranking}{a \code{rankingDE} object, rankings rows of the genes of interest in the ranking dataframe.}
 
 \item{subset.genes}{character vector, the names of the genes of interest.}
+
+\item{reg.f}{a function to perform regression, either "loess" or "n.splines".}
 
 \item{null.model}{logical, if the plot of null model is wanted (default is FALSE).}
 

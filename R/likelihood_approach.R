@@ -5,9 +5,10 @@
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
-#' @param reg the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.
-#' @param aic logical, if the aic criteria is to be computedor not (default is TRUE).
+#' @param reg the regression method to use, either "loess" with the gam package or "n.splines" which fits a spline with gam package.
+#' @param pval logical, if the likelihood criteria is to be computed or not (default is TRUE).
 #' @param span numeric, for the loess regression, control the ammount of regularization for the loess regression.
+#' @param df numeric, smoothing parameter for the n.splines regression.
 #' @param fam character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
 
 #' @return returns the pvalue and if asked the aic difference for the gene of intereset.
@@ -17,25 +18,17 @@
 #' @importFrom VGAM df.residual
 #' @export
 
-likelihood_criteria <- function(data, gene, reg, aic = T, span = 0.5, fam = "gaussian"){
-  if (reg == "loess"){
-    regs <- reg_loess(data, gene, span = span)$reg
-    method = list(reg = reg, span = span)
-  }
-  else if (reg == "vgam"){
-    regs <- reg_vgam(data, gene, fam)$reg
-    method <- list(reg = reg, fam = fam)
-  }
+likelihood_criteria <- function(data, gene, reg, pval = T, span = 0.75, df = 3, fam = "gaussian"){
+  regs <- reg_gam(data, gene, reg, span = span, df = df)$reg
   reg.null <- regs$null
   reg.alt <- regs$alt
-  testStatistic <- 2* (logLik(reg.alt)[1] - logLik(reg.null)[1])
-  ############ BIG question here concerning the null model and its degree of freedom################
-  pval <- pchisq(testStatistic, df = df.residual(reg.null) - df.residual(reg.alt) , lower.tail = F)
-  res <- list(pval = pval)
-  if (aic == T){
-    res$aic.diff <- AIC(reg.null) - AIC(reg.alt)
+  res <- list()
+  res$aic.diff <- AIC(reg.null) - AIC(reg.alt)
+  if (pval == T){
+    testStatistic <- 2* (logLik(reg.alt)[1] - logLik(reg.null)[1])
+    ####### Verify what genes it gives
+    res$pval <- pchisq(testStatistic, df = df.residual(reg.null) - df.residual(reg.alt) , lower.tail = F)
   }
-  res$method <- method
   return(res)
 }
 
@@ -46,8 +39,9 @@ likelihood_criteria <- function(data, gene, reg, aic = T, span = 0.5, fam = "gau
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param reg the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.
-#' @param aic logical, if the aic criteria is to be computedor not (default is TRUE).
+#' @param pval logical, if the pval criteria is to be computedor not (default is TRUE).
 #' @param span numeric, for the loess regression, control the ammount of regularization for the loess regression.
+#' @param df numeric, smoothing parameter for the n.splines regression.
 #' @param fam character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
 #'
 #' @return returns \code{rankingDE} objects: one for the likelihood ratio test pvalues and one for the aic difference criteria if aic == T.
@@ -55,25 +49,26 @@ likelihood_criteria <- function(data, gene, reg, aic = T, span = 0.5, fam = "gau
 #' @export
 
 likelihood_rank <- function(data,
-                      reg = "loess",
-                      aic = T,
-                      span = 0.5,
-                      fam = "gaussian"
-                      ){
+                            reg.f = "n.splines",
+                            pval = T,
+                            span = 0.75,
+                            df = 3,
+                            fam = "gaussian"){
   res <- list()
-  criteria <- sapply(rownames(data@counts), function(x) likelihood_criteria(data, x, reg))
-  pvalues <- unlist(criteria[1,])
-  method <- as.list(unlist(criteria[3,1]))
-  ranking_pval <- data.frame(pval = pvalues, rank = length(pvalues) - rank(pvalues) + 1)
-  ranking_pval <- ranking_pval[order(ranking_pval$rank),]
-  method$method <- "pval"
-  res$pval <- new("rankingDE", ranking.df = ranking_pval, params = method)
-  if (aic ==T){
-    aic <-unlist(criteria[2,])
-    ranking_aic <- data.frame(aic.diff = aic, rank = length(aic) - rank(aic) + 1)
-    ranking_aic <- ranking_aic[order(ranking_aic$rank),]
-    method$method <- "AIC difference"
-    res$aic <- new("rankingDE", ranking.df = ranking_aic, params = method)
+  criteria <- sapply(rownames(data@counts), function(x) likelihood_criteria(data, x, reg.f, span = span, df = df, fam = fam))
+  aic <- unlist(criteria[1,])
+  ranking_aic <- data.frame(aic.diff = aic, rank = length(aic) - rank(aic) + 1)
+  ranking_aic <- ranking_aic[order(ranking_aic$rank),]
+  if (reg.f =="loess"){smooth = span}
+  if (reg.f =="n.splines"){smooth = df}
+  params <- list(method = paste(reg.f, "AIC difference"), smooth = smooth, fam = fam)
+  res$aic <- new("rankingDE", ranking.df = ranking_aic, params = params)
+  if (pval ==T){
+    pvalues <- unlist(criteria[2,])
+    ranking_pval <- data.frame(pval = pvalues, rank = rank(pvalues))
+    ranking_pval <- ranking_pval[order(ranking_pval$rank),]
+    params$method <- paste(reg.f, "pval")
+    res$pval <- new("rankingDE", ranking.df = ranking_pval, params = params)
   }
   return(res)
 }

@@ -4,19 +4,21 @@
 \alias{likelihood_rank}
 \title{Vgam ranks}
 \usage{
-likelihood_rank(data, reg = "loess", aic = T, span = 0.5,
-  fam = "gaussian")
+likelihood_rank(data, reg.f = "n.splines", pval = T, span = 0.75,
+  df = 3, fam = "gaussian")
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
 
-\item{reg}{the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.}
-
-\item{aic}{logical, if the aic criteria is to be computedor not (default is TRUE).}
+\item{pval}{logical, if the pval criteria is to be computedor not (default is TRUE).}
 
 \item{span}{numeric, for the loess regression, control the ammount of regularization for the loess regression.}
 
+\item{df}{numeric, smoothing parameter for the n.splines regression.}
+
 \item{fam}{character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").}
+
+\item{reg}{the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.}
 }
 \value{
 returns \code{rankingDE} objects: one for the likelihood ratio test pvalues and one for the aic difference criteria if aic == T.

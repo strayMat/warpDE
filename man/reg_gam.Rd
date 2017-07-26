@@ -4,15 +4,16 @@
 \alias{reg_gam}
 \title{Plot one gene raw data and its regressions}
 \usage{
-reg_gam(data, gene, reg, span = 0.75, df = 3, regression = T,
-  null.model = T, npred = F, sd.show = F, legend.show = F, ...)
+reg_gam(data, gene, reg.f = "n.splines", span = 0.75, df = 3,
+  regression = T, null.model = T, npred = F, sd.show = F,
+  legend.show = F)
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
 
 \item{gene}{character, a gene of interest.}
 
-\item{reg}{a function to perform regression, either "loess" or "n.splines".}
+\item{reg.f}{a function to perform regression, either "loess" or "n.splines".}
 
 \item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 
@@ -30,7 +31,7 @@ reg_gam(data, gene, reg, span = 0.75, df = 3, regression = T,
 }
 \value{
 returns \itemize{\item{\code{pl},the visualization of the data}
-\item{\code{reg}, the regression objects for both lineages and the null model.}}
+\item{\code{regs}, the regression objects for both lineages and the null model.}}
 }
 \description{
 Tools for visualizing gene signals for one given gene with the gam framework.
