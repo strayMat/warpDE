@@ -4,7 +4,7 @@
 #' @description
 #'
 #' @param data a \code{lineageDEDataSet} with genes to be ranked.
-#' @param reg.f a character, ("splines" or "loess") , to choose which regression to predict with before computing the dtw distance (default is "splines").
+#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param norm  character,("L2" or "L1") the norm to be used for the dtw distance (default is "L2")
@@ -17,7 +17,7 @@
 #' @importFrom dtwclust dtw_basic
 #' @export
 dtw_rank <- function(data,
-                     reg.f = "splines",
+                     reg.f = "ns",
                      span = 0.75,
                      s.df = 4,
                      norm ="L2",
@@ -43,20 +43,13 @@ dtw_rank <- function(data,
   for (g in 1:n){
     gene <- rownames(logCounts)[g]
     y <- logCounts[g, ]
-    if (reg.f == "splines"){
-      alt <- reg_gam(data, gene, reg.f = reg.f, span = span, s.df = s.df, null.model = F)$reg$alt
-      y1new <- predict(alt, data.frame(x.fit = t[cells_pred1,1], lineage = rep(1, length(cells_pred1))))
-      y1new <- y1new[order(t[cells_pred1,1])]
-      y2new <- predict(alt, data.frame(x.fit = t[cells_pred2,2], lineage = rep(2, length(cells_pred2))))
-      y2new <- y2new[order(t[cells_pred2,2])]
-    }
-    if (reg.f == "loess"){
-      alt <- reg_gam(data, gene, reg.f = reg.f, span = span, s.df = s.df, null.model = F)$reg$alt
-      y1new <- predict(alt, data.frame(x.fit = t[cells_pred1,1], lineage = rep(1, length(cells_pred1))))
-      y1new <- y1new[order(t[cells_pred1,1])]
-      y2new <- predict(alt, data.frame(x.fit = t[cells_pred2,2], lineage = rep(2, length(cells_pred2))))
-      y2new <- y2new[order(t[cells_pred2,2])]
-    }
+
+    alt <- reg_gam(data, gene, reg.f = reg.f, span = span, s.df = s.df, null.model = F)$reg$alt
+    y1new <- predict(alt, data.frame(x.fit = t[cells_pred1,1], lineage = rep(1, length(cells_pred1))))
+    y1new <- y1new[order(t[cells_pred1,1])]
+    y2new <- predict(alt, data.frame(x.fit = t[cells_pred2,2], lineage = rep(2, length(cells_pred2))))
+    y2new <- y2new[order(t[cells_pred2,2])]
+
     if (Zscore == T){
       y1new <- zscore(y1new)
       y2new <- zscore(y2new)
@@ -68,9 +61,9 @@ dtw_rank <- function(data,
   rownames(dtw_ranking) <- rownames(logCounts)
   dtw_ranking$rank <- n - rank(dtw_ranking$dist) + 1
   dtw_ranking <- dtw_ranking[order(dtw_ranking$rank),]
-  if (reg.f =="loess"){smooth = span}
-  if (reg.f =="splines"){smooth = s.df}
-  result <- new("rankingDE", ranking.df = dtw_ranking, params = list(method = paste(reg.f, "dtw"), smooth = smooth, window.size = window.size, dtw.norm = norm))
+  if (reg.f =="loess"){smooth.param = span}
+  if (reg.f =="splines"){smooth.param = s.df}
+  result <- new("rankingDE", ranking.df = dtw_ranking, params = list(method = paste(reg.f, "dtw"), smooth.param = smooth.param, window.size = window.size, dtw.norm = norm))
   return(result)
 }
 

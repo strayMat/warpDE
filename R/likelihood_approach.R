@@ -59,9 +59,9 @@ likelihood_rank <- function(data,
   aic <- unlist(criteria[1,])
   ranking_aic <- data.frame(aic.diff = aic, rank = length(aic) - rank(aic) + 1)
   ranking_aic <- ranking_aic[order(ranking_aic$rank),]
-  if (reg.f =="loess"){smooth = span}
-  if (reg.f =="splines"){smooth = s.df}
-  params <- list(method = paste(reg.f, "AIC diff"), smooth = smooth, fam = fam)
+  if (reg.f =="loess"){smooth.param = span}
+  if (reg.f =="splines"){smooth.param = s.df}
+  params <- list(method = paste(reg.f, "AIC diff"), smooth.param = smooth.param, fam = fam)
   res$aic <- new("rankingDE", ranking.df = ranking_aic, params = params)
   if (pval ==T){
     pvalues <- unlist(criteria[2,])
