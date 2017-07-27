@@ -4,9 +4,11 @@
 \alias{kendall.heatmap}
 \title{Heatmap visualization of multiple kendall comparisons}
 \usage{
-kendall.heatmap(rankings, ...)
+kendall.heatmap(rankings, labels = NULL, ...)
 }
 \arguments{
+\item{labels}{character, a charcater vector for renaming the rankings to compare (default will use the  parameters of the rankings).}
+
 \item{...}{other parameters for the function \code{corrplot}.}
 
 \item{ranking}{list, a list of \code{rankingDE} objects.}

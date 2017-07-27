@@ -4,7 +4,7 @@
 \alias{likelihood_criteria}
 \title{Compute pvalues and aic difference criteria}
 \usage{
-likelihood_criteria(data, gene, reg, pval = T, span = 0.75, df = 3,
+likelihood_criteria(data, gene, reg, pval = T, span = 0.75, s.df = 4,
   fam = "gaussian")
 }
 \arguments{
@@ -12,13 +12,13 @@ likelihood_criteria(data, gene, reg, pval = T, span = 0.75, df = 3,
 
 \item{gene}{character, a gene of interest.}
 
-\item{reg}{the regression method to use, either "loess" with the gam package or "n.splines" which fits a spline with gam package.}
+\item{reg}{the regression method to use, either "loess" with the gam package or "splines" which fits a spline with gam package.}
 
 \item{pval}{logical, if the likelihood criteria is to be computed or not (default is TRUE).}
 
-\item{span}{numeric, for the loess regression, control the ammount of regularization for the loess regression.}
+\item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 
-\item{df}{numeric, smoothing parameter for the n.splines regression.}
+\item{s.df}{numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).}
 
 \item{fam}{character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").}
 }

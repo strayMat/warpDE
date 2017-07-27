@@ -5,10 +5,10 @@
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
-#' @param reg the regression method to use, either "loess" with the gam package or "n.splines" which fits a spline with gam package.
+#' @param reg the regression method to use, either "loess" with the gam package or "splines" which fits a spline with gam package.
 #' @param pval logical, if the likelihood criteria is to be computed or not (default is TRUE).
-#' @param span numeric, for the loess regression, control the ammount of regularization for the loess regression.
-#' @param df numeric, smoothing parameter for the n.splines regression.
+#' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
+#' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param fam character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
 
 #' @return returns the pvalue and if asked the aic difference for the gene of intereset.
@@ -18,8 +18,8 @@
 #' @importFrom VGAM df.residual
 #' @export
 
-likelihood_criteria <- function(data, gene, reg, pval = T, span = 0.75, df = 3, fam = "gaussian"){
-  regs <- reg_gam(data, gene, reg, span = span, df = df)$reg
+likelihood_criteria <- function(data, gene, reg, pval = T, span = 0.75, s.df = 4, fam = "gaussian"){
+  regs <- reg_gam(data, gene, reg, span = span, s.df = s.df)$reg
   reg.null <- regs$null
   reg.alt <- regs$alt
   res <- list()
@@ -40,8 +40,8 @@ likelihood_criteria <- function(data, gene, reg, pval = T, span = 0.75, df = 3, 
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param reg the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.
 #' @param pval logical, if the pval criteria is to be computedor not (default is TRUE).
-#' @param span numeric, for the loess regression, control the ammount of regularization for the loess regression.
-#' @param df numeric, smoothing parameter for the n.splines regression.
+#' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
+#' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param fam character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").
 #'
 #' @return returns \code{rankingDE} objects: one for the likelihood ratio test pvalues and one for the aic difference criteria if aic == T.
@@ -49,19 +49,19 @@ likelihood_criteria <- function(data, gene, reg, pval = T, span = 0.75, df = 3, 
 #' @export
 
 likelihood_rank <- function(data,
-                            reg.f = "n.splines",
+                            reg.f = "splines",
                             pval = T,
                             span = 0.75,
-                            df = 3,
+                            s.df = 4,
                             fam = "gaussian"){
   res <- list()
-  criteria <- sapply(rownames(data@counts), function(x) likelihood_criteria(data, x, reg.f, span = span, df = df, fam = fam))
+  criteria <- sapply(rownames(data@counts), function(x) likelihood_criteria(data, x, reg.f, span = span, s.df = s.df, fam = fam))
   aic <- unlist(criteria[1,])
   ranking_aic <- data.frame(aic.diff = aic, rank = length(aic) - rank(aic) + 1)
   ranking_aic <- ranking_aic[order(ranking_aic$rank),]
   if (reg.f =="loess"){smooth = span}
-  if (reg.f =="n.splines"){smooth = df}
-  params <- list(method = paste(reg.f, "AIC difference"), smooth = smooth, fam = fam)
+  if (reg.f =="splines"){smooth = s.df}
+  params <- list(method = paste(reg.f, "AIC diff"), smooth = smooth, fam = fam)
   res$aic <- new("rankingDE", ranking.df = ranking_aic, params = params)
   if (pval ==T){
     pvalues <- unlist(criteria[2,])

@@ -4,17 +4,17 @@
 \alias{likelihood_rank}
 \title{Vgam ranks}
 \usage{
-likelihood_rank(data, reg.f = "n.splines", pval = T, span = 0.75,
-  df = 3, fam = "gaussian")
+likelihood_rank(data, reg.f = "splines", pval = T, span = 0.75,
+  s.df = 4, fam = "gaussian")
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
 
 \item{pval}{logical, if the pval criteria is to be computedor not (default is TRUE).}
 
-\item{span}{numeric, for the loess regression, control the ammount of regularization for the loess regression.}
+\item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 
-\item{df}{numeric, smoothing parameter for the n.splines regression.}
+\item{s.df}{numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).}
 
 \item{fam}{character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").}
 

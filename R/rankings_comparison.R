@@ -150,6 +150,7 @@ elbow_curve <- function(ranking, xmax = nrow(ranking), xfit = 0.005* nrow(rankin
 #' @description Compute pairwise kendall taus between the elements of a list from a \code{rankingDE}.
 #'
 #' @param ranking list, a list of \code{rankingDE} objects.
+#' @param labels character, a charcater vector for renaming the rankings to compare (default will use the  parameters of the rankings).
 #' @param ... other parameters for the function \code{corrplot}.
 #'
 #' @return returns a heatmap of kendall's tau
@@ -157,7 +158,8 @@ elbow_curve <- function(ranking, xmax = nrow(ranking), xfit = 0.005* nrow(rankin
 #' @importFrom VGAM kendall.tau
 #' @importFrom corrplot corrplot
 #' @export
-kendall.heatmap <- function(rankings,...){
+#'
+kendall.heatmap <- function(rankings, labels = NULL, ...){
   lr <- length(rankings)
   tau_matrix <- matrix(nrow = lr, ncol = lr)
   for (r1 in 1:lr){
@@ -166,7 +168,11 @@ kendall.heatmap <- function(rankings,...){
     }
   }
   rnames <- sapply(rankings, function(x) paste(x@params$method, x@params$reg))
+  if (!is.null(labels)){
+   rnames <- labels
+  }
   colnames(tau_matrix) <- rnames
   rownames(tau_matrix) <- rnames
+
   corrplot(tau_matrix, addCoef.col = "black", cl.pos = "n", tl.col = "black", ...)
 }

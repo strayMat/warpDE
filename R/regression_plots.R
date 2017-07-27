@@ -7,9 +7,9 @@
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
-#' @param reg.f a function to perform regression, either "loess" or "n.splines".
+#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
-#' @param df numeric, a smoothing parameter for the splines regregression (default is 3, see \code{gam::ns} for details about regularization).
+#' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param regression logical, if the loess regression is to be computed and plotted or not (default is TRUE).
 #' @param null.model logical, if the null model is to be computed and plotted or not (default is TRUE).
 #' @param npred logical, if the unshared part of the data is to be plotted or not(default is FALSE).
@@ -20,15 +20,16 @@
 #' \item{\code{regs}, the regression objects for both lineages and the null model.}}
 #'
 #' @import ggplot2
-#' @importFrom msir loess.sd
 #' @importFrom splines ns
-#' @import gam
+#' @importFrom gam gam
+#' @importFrom gam s
+#' @importFrom gam lo
 #' @export
 reg_gam <- function(data,
                     gene,
-                    reg.f = "n.splines",
+                    reg.f = "ns",
                     span = 0.75,
-                    df = 3,
+                    s.df = 4,
                     regression = T,
                     null.model = T,
                     npred = F,
@@ -63,12 +64,14 @@ reg_gam <- function(data,
     if (reg.f == "loess"){
       alt <- gam(y.fit ~ lineage + lo(x.fit, span = span) + lo(x.fit, span = span):lineage , weights = w.fit, data = reg.df.d)
     }
-    else if (reg.f == "n.splines"){
-      alt <- gam(y.fit ~ lineage + ns(x.fit, df = df) + ns(x.fit, df = df):lineage , weights = w.fit, data = reg.df.d)
+    else if (reg.f == "ns"){
+      alt <- gam(y.fit ~ lineage + ns(x.fit, s.df) + ns(x.fit, s.df):lineage , weights = w.fit, data = reg.df.d)
+    }
+    else if (reg.f == "splines"){
+      alt <- gam(y.fit ~ lineage + s(x.fit, 4) + s(x.fit, 4):lineage , weights = w.fit, data = reg.df.d)
     }
     y_pred.alt1 <- predict(alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))
     y_pred.alt2 <- predict(alt, data.frame(x.fit = t2new, lineage = rep(2, length(t2new))))
-
     plalt <- pl + geom_line(aes(t1new, y_pred.alt1), col = "#E41A1C") + geom_line(aes(t2new, y_pred.alt2), col = "#377EB8")
     regs <- list(alt = alt)
     if (null.model == T){
@@ -76,8 +79,11 @@ reg_gam <- function(data,
       if (reg.f == "loess"){
         null.m <- gam(y.fit ~ lo(x.fit, span = span), weights = w.fit, data = reg.df.d)
       }
-      else if (reg.f == "n.splines"){
-        null.m <- gam(y.fit ~ ns(x.fit, df = df), weights = w.fit, data = reg.df.d)
+      else if (reg.f == "ns"){
+        null.m <- gam(y.fit ~ ns(x.fit, df = s.df), weights = w.fit, data = reg.df.d)
+      }
+      else if (reg.f == "splines"){
+        null.m <- gam(y.fit ~ s(x.fit, df = 4), weights = w.fit, data = reg.df.d)
       }
       y_pred.null <- predict(null.m, data.frame(x.fit = t1new))
       plalt <- plalt + geom_line(aes(t1new, y_pred.null, colour = "null model"), linetype = 2, na.rm = T)
@@ -117,7 +123,9 @@ reg_gam <- function(data,
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param ranking a \code{rankingDE} object, rankings rows of the genes of interest in the ranking dataframe.
 #' @param subset.genes character vector, the names of the genes of interest.
-#' @param reg.f a function to perform regression, either "loess" or "n.splines".
+#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).
+#' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
+#' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param null.model logical, if the plot of null model is wanted (default is FALSE).
 #' @param grid.size 2 by 2 vector, for the number of rows and the number of columns that we want for the plot (the size of grid must #' be greater than the number of genes of interest), default is NULL fo a squared grid.
 #' @return a visualization of the genes of interest.
@@ -130,7 +138,9 @@ reg_gam <- function(data,
 plot_multigenes <- function(data,
                             ranking,
                             subset.genes,
-                            reg.f = "n.splines",
+                            reg.f = "ns",
+                            span = 0.75,
+                            df = 4,
                             null.model = F,
                             grid.size = NULL
 ){
@@ -152,7 +162,7 @@ plot_multigenes <- function(data,
     reg = ranking@params$reg
   }
   subset.genes <- data.frame(ranking@ranking.df)[subset.genes,]
-  graphs <- lapply(rownames(subset.genes), function(x) reg_gam(gene = x, data = data, reg.f = reg.f, null.model = null.model)$pl + labs(subtitle = paste0(reg, ": ", method,".dist: ",round(subset.genes[x,1],1), " | ",method,".rank:", subset.genes[x,2])))
+  graphs <- lapply(rownames(subset.genes), function(x) reg_gam(gene = x, data = data, reg.f = reg.f, span = span, s.df =s.df, null.model = null.model)$pl + labs(subtitle = paste0(reg, ": ", method,".dist: ",round(subset.genes[x,1],1), " | ",method,".rank:", subset.genes[x,2])))
   return(plot_grid(plotlist = graphs, ncol = grid.size[2], nrow = grid.size[1]))
 }
 
@@ -266,11 +276,11 @@ timeDE <- function(data,
 #'   }
 #'   else{
 #'     reg.df.d <- rbind(reg.df1, reg.df2)
-#'     spl.alt <- vglm(y.fit ~ lineage + sm.ns(x.fit, df = 3) + sm.ns(x.fit, df = 3):lineage, family = fam, weights = w.fit, data = reg.df.d)
+#'     spl.alt <- vglm(y.fit ~ lineage + sm.s(x.fit, df = 3) + sm.s(x.fit, df = 3):lineage, family = fam, weights = w.fit, data = reg.df.d)
 #'     reg <- list(alt = spl.alt)
 #'     if (null.model == T){
 #'       # null model
-#'       spl.d <- vglm(y.fit ~ sm.ns(x.fit, df = 3), weights = w.fit, family = fam, data = reg.df.d)
+#'       spl.d <- vglm(y.fit ~ sm.s(x.fit, df = 3), weights = w.fit, family = fam, data = reg.df.d)
 #'       reg$null <- spl.d
 #'     }
 #'     # prediciton at new points and curve plotting

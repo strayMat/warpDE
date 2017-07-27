@@ -4,7 +4,7 @@
 \alias{dtw_rank}
 \title{Compute a ranking of a list of genes based on the dtw distance between two lineages}
 \usage{
-dtw_rank(data, reg.f = "n.splines", span = 0.75, df = 3, norm = "L2",
+dtw_rank(data, reg.f = "splines", span = 0.75, s.df = 4, norm = "L2",
   window.size = NULL, equal.size = NULL, Zscore = F)
 }
 \arguments{
@@ -14,7 +14,7 @@ dtw_rank(data, reg.f = "n.splines", span = 0.75, df = 3, norm = "L2",
 
 \item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 
-\item{df}{numeric, a smoothing parameter for the splines regregression (default is 3, see \code{gam::ns} for details about regularization).}
+\item{s.df}{numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).}
 
 \item{norm}{character,("L2" or "L1") the norm to be used for the dtw distance (default is "L2")}
 
