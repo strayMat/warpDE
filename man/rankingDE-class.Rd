@@ -6,11 +6,14 @@
 \alias{rankingDE}
 \alias{ranking.df,rankingDE-method}
 \alias{params,rankingDE-method}
+\alias{g.rank,rankingDE-method}
 \title{Class \code{rankingDE}}
 \usage{
 \S4method{ranking.df}{rankingDE}(x)
 
 \S4method{params}{rankingDE}(x)
+
+\S4method{g.rank}{rankingDE}(x, g.list)
 }
 \arguments{
 \item{x}{a \code{rankingDE} object.}
@@ -24,5 +27,7 @@ The \code{rankingDE} class holds da ranking format for the \code{lineageDE} pack
 \item \code{ranking.df}: returns the ranking dataframe.
 
 \item \code{params}: returns list of parameters used to create the ranking.
+
+\item \code{g.rank}: returns the ranks and criteria of some genes.
 }}
 

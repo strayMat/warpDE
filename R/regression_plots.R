@@ -105,8 +105,8 @@ reg_gam <- function(data,
       middle_w2 <- w[w[,2]!=0 & w[,2]!=1,2]
       cells_pred1 <- names(w[w[,1] > (0.5 + sd(middle_w1)),1])
       cells_pred2 <- names(w[w[,2] > (0.5 + sd(middle_w2)),2])
-      plalt <- plalt + geom_point(aes(t[cells_pred1,1], predict(regs$alt, data.frame(x.fit = t[cells_pred1,1], lineage = rep(1, length(cells_pred1))))), alpha = 0.4, col = "#E41A1C", size = 1)+
-        geom_point(aes(t[cells_pred2,2], predict(regs$alt, data.frame(x.fit = t[cells_pred2,2], lineage = rep(2, length(cells_pred2))))), alpha = 0.4, col = "#377EB8", size = 1)
+      plalt <- plalt + geom_point(aes(t[cells_pred1,1], predict(regs$alt, data.frame(x.fit = t[cells_pred1,1], lineage = rep(1, length(cells_pred1))))), alpha = 0.4, col = "black", size = 1)+
+        geom_point(aes(t[cells_pred2,2], predict(regs$alt, data.frame(x.fit = t[cells_pred2,2], lineage = rep(2, length(cells_pred2))))), alpha = 0.4, col = "black", size = 1)
   }
   if (legend.show == F){
       plalt <- plalt + theme(legend.position = "none")

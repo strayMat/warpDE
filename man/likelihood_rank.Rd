@@ -4,13 +4,15 @@
 \alias{likelihood_rank}
 \title{Vgam ranks}
 \usage{
-likelihood_rank(data, reg.f = "splines", pval = T, span = 0.75,
-  s.df = 4, fam = "gaussian")
+likelihood_rank(data, reg.f = "ns", pval = F, span = 0.75, s.df = 4,
+  fam = "gaussian", dtw = F)
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
 
-\item{pval}{logical, if the pval criteria is to be computedor not (default is TRUE).}
+\item{reg.f}{the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.}
+
+\item{pval}{logical, if the pval criteria is to be computedor not (default is F).}
 
 \item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 
@@ -18,7 +20,7 @@ likelihood_rank(data, reg.f = "splines", pval = T, span = 0.75,
 
 \item{fam}{character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").}
 
-\item{reg}{the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.}
+\item{dtw}{logical, if the alignment should be made with dtw before acomputing the likelihood, (default is FALSE) .}
 }
 \value{
 returns \code{rankingDE} objects: one for the likelihood ratio test pvalues and one for the aic difference criteria if aic == T.

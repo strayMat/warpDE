@@ -2,12 +2,12 @@
 % Please edit documentation in R/AllGenerics.R
 \name{params}
 \alias{params}
-\title{Returns the pseudotimes}
+\title{Returns the parameters}
 \usage{
 params(x)
 }
 \arguments{
-\item{x}{an object that describes a dataset.}
+\item{x}{a \code{rankingDE} object.}
 }
 \value{
 the list of parameters.

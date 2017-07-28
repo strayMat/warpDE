@@ -42,3 +42,12 @@ setMethod(
   signature = "rankingDE",
   definition = function(x) x@params
 )
+
+
+#' @describeIn rankingDE returns the ranks and criteria of some genes.
+#' @export
+setMethod(
+  f = "g.rank",
+  signature = "rankingDE",
+  definition = function(x, g.list) x@ranking.df[g.list,]
+)

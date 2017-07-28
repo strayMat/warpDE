@@ -4,23 +4,25 @@
 \alias{likelihood_criteria}
 \title{Compute pvalues and aic difference criteria}
 \usage{
-likelihood_criteria(data, gene, reg, pval = T, span = 0.75, s.df = 4,
-  fam = "gaussian")
+likelihood_criteria(data, gene, reg.f = "ns", pval = F, span = 0.75,
+  s.df = 4, fam = "gaussian", dtw = F)
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
 
 \item{gene}{character, a gene of interest.}
 
-\item{reg}{the regression method to use, either "loess" with the gam package or "splines" which fits a spline with gam package.}
+\item{reg.f}{the regression method to use, either "loess" with the gam package or "splines" which fits a spline with gam package.}
 
-\item{pval}{logical, if the likelihood criteria is to be computed or not (default is TRUE).}
+\item{pval}{logical, if the likelihood criteria is to be computed or not (default is FALSE).}
 
 \item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 
 \item{s.df}{numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).}
 
 \item{fam}{character, for the vgam regression, the distribution assumption of the residuals; etiher "binomial" or "gaussian" (default is "gaussian").}
+
+\item{dtw}{logical, if the alignment should be made with dtw before acomputing the likelihood, (default is FALSE) .}
 }
 \value{
 returns the pvalue and if asked the aic difference for the gene of intereset.

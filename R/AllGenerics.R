@@ -84,19 +84,28 @@ setGeneric(
 # accessor functions
 #' @title Returns the ranking
 #' @name ranking.df
-#' @param x an object that describes a dataset
+#' @param x a \code{rankingDE} object.
 #' @return the matrix representing log1p of the data.
 #' @export
 setGeneric(name = "ranking.df",
            signature = "x",
            def = function(x) standardGeneric("ranking.df"))
 
-#' @title Returns the pseudotimes
+#' @title Returns the parameters
 #' @name params
-#' @param x an object that describes a dataset.
+#' @param x a \code{rankingDE} object.
 #' @return the list of parameters.
 #' @export
 setGeneric(name = "params",
            signature = "x",
            def = function(x) standardGeneric("params"))
 
+
+#' @title Returns the rank and distance of some genes
+#' @name g.rank
+#' @param x a \code{rankingDE} object.
+#' @return the ranks and criteria values for the genes of interest.
+#' @export
+setGeneric(name = "g.rank",
+           signature = "x",
+           def = function(x, g.list) standardGeneric("g.rank"))
