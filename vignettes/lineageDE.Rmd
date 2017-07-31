@@ -17,6 +17,7 @@ link-citations: true
 knitr::opts_chunk$set(cache=TRUE, message = F, warning = F, fig.height=4, fig.width=6, fig.align="center")
 library(ggplot2)
 theme_update(plot.title = element_text(hjust = 0.5))
+#setwd("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE")
 ```
 
 # 1 - Introduction
@@ -31,17 +32,17 @@ This vignette will use the data from [@Fletcher2017] of Olfactory Epithelium cel
 
 ## 1.1 - Preprocessing of the data for our analysis
 
-Before searching for differentially expressed genes between lineages, we have to preprocess the data and run slingshot on it. We use data from [@Fletcher2017], which is already filtered and normalized with [Scone](https://github.com/YosefLab/scone) . Scone tries different normalization techniques, batch or technical effects removal methods and provides tools to rank this different normalizations.
+Before searching for differentially expressed genes between lineages, we have to preprocess the data and run slingshot on it. We use data from [@Fletcher2017], which is already filtered and normalized with [Scone](https://github.com/YosefLab/scone). Scone tries different normalization techniques, batch or technical effects removal methods and provides tools to rank this different normalizations.
 
 We load this data from the package [lineageDE](https://github.com/strayMat/lineageDE) which contains also the different functions that we use in this study. We also load the package [slingshot](https://github.com/kstreet13/slingshot) [@Street2017] which allows us to perform the lineage inferrence.
 
-```{r}
+```{r, message = F}
 library(lineageDE)
 library(slingshot)
+library(gridExtra)
 # For nice color
 library(RColorBrewer)
-#data("OE_counts")
-setwd("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE")
+data("OE_counts")
 load("Data/OE_counts.RData")
 ```
 
@@ -57,8 +58,15 @@ We apply slingshot to infer the lineages curves:
 ```{r}
 slrun <- slingshot(pca$x[,1:3], clusters, start.clus = '1', end.clus = '4')
 plot3d(pca$x[,1:3], col = clust_col)
-plot3d.SlingshotDataSet(slrun, type = "curves", add = T)
+plot3d.SlingshotDataSet(slrun, type = "curves", add = T, size = 0.5)
 ```
+
+Slingshot draws smooth curves in the 3D representation of the cells.
+
+<img src="images/slingshot3d.png" alt="alt text" width=100% height=30%>
+<center>View of the first 3 PCs of the cells with the Slingshot lineages</center>
+
+We can also have a 2D plot of the lineages by projecting on the first two PCs:
 
 ```{r,fig.height=5, fig.width=5, fig.align="center"}
 # generate 2D captures of the 3d plots for the rmarkdown
@@ -70,7 +78,7 @@ for(c in curves(slrun)){
 title("View of the first two Pcs of the data with principal curves")
 ```
 
-Then, we store the slingshot outputs for our future DE analysis, and create a new data objects with the desired inputs:
+Then, we store the slingshot outputs for our future DE analysis, and we create a new data objects with the desired inputs:
 ```{r}
 times <- pseudotime(slrun)
 weights <- curveWeights(slrun)
@@ -87,114 +95,109 @@ We plot the gene expression profile for the first gene of the dataset: CreER
 The points are colored by lineage: red is the first lineage (GBC and neuronal cells) and blue is the second lineage (sustentacular cells).
 ```{r,fig.height=4, fig.width=6, fig.align="center"}
 gene <- "CreER"
-reg_loess(df, gene, regression = F)
+reg_gam(df, gene, regression = F)
 ```
 
 We fit a different loess regression for each lineage and one loess regression including both lineages at the same time (the null model). This gives us a representation of the activation pattern for a given gene.
 ```{r,fig.height=4, fig.width=6, fig.align="center"}
-reg_loess(df, gene, legend.show = T)$pl
+reg_gam(df, gene, legend.show = T)$pl
 ```
 
 The main goal of the analysis is to find genes which are strongly differrentially expressed between the two reconstructed lineages. In a sense we are searching for branching expression pattern, branching curves uin our visualization.
-```{r, fig.show = "hold"}
-reg_vgam(df, 'Ncaph2')$pl 
-reg_vgam(df, 'Cyp2g1')$pl 
+```{r}
+grid.arrange(reg_gam(df, 'Cyp2g1')$pl, reg_gam(df, 'Ncaph2')$pl, ncol = 2) 
 ```
 
-On the left, we see an unintersting pattern for us, because both genes are expressed similarly in both lineages.
-On the right, we displayed Cyp2g1, a differentially expressed gene similar to the one that we want to detect.
+On the left,  we displayed Cyp2g1, a differentially expressed gene with a pattern similar to the ones that we want to detect.
+On the right, we see an unintersting pattern for us; both genes are expressed similarly in both lineages.
 
 # 3 - Likelihood method
 
 ```{r, include = F, echo = F}
 # load ranking instead of computing them in order to gain time for knit (from 30 min to 2 min)
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/vgam.rank.RDATA")
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/loess.rank.RDATA")
+#load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/loess.rank.RDATA")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/s.rank.RDATA")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/s.dtw.ranking.RDATA")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/s.mix.ranking.RDATA")
 load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/euclidean.ranking.RDATA")
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/dtw.rankings.RDATA")
 ```
 
-The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function \code{likelihood_rank} computes these values and returns a ranking. This ranking function takes a few minutes to run.
+The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function \code{likelihood_rank} computes these values and returns a ranking. This ranking function takes a few minutes to run. 
+
+The main parameters to tune are: 
+- the choice of regression function ("loess" from  [@Cleveland1988] or "ns" for natural cubic splines);
+- the smoothing parameter: `s.df`, the equivalent degrees of freedoms for natural splines and `span`, the span parameter for the loess.
 ```{r, include = T, eval = F}
-lkl.rank <- likelihood_rank(df, reg = "vgam")
-vgam.aic.ranking <- lkl.rank$aic
-vgam.pval.ranking <- lkl.rank$pval
+s.rank <- likelihood_rank(df, 'ns', pval = T, s.df = 4)
+s.aic.ranking <- s.rank$aic
+s.pval.ranking <- s.rank$pval
 ```
 
 ```{r}
-plot_multigenes(df, vgam.aic.ranking, rownames(ranking.df(vgam.aic.ranking))[1:9], grid.size = c(2,4))
-plot_multigenes(df, vgam.pval.ranking, rownames(ranking.df(vgam.pval.ranking))[1:9], grid.size = c(2,4))
-
+plot_multigenes(df, s.aic.ranking, rownames(ranking.df(s.aic.ranking))[1:8], grid.size = c(2,4))
+plot_multigenes(df, s.pval.ranking, rownames(ranking.df(s.pval.ranking))[1:8], grid.size = c(2,4))
 ```
 
 # 4 - DTW method
 
-Another way to infer differentially expressed genes is to consider the gene counts as time series data. Thus, for each gene we compare the difference between each lineages with the Dynamic Time Warping distance which allows local distorsions of the time axis.
+Another way to infer differentially expressed genes is to consider the gene counts as time series data. Thus, for each gene we simply compare the difference between each lineages with the Dynamic Time Warping distance which allows local distorsions of the time axis. We can also choose the regression and the smoothing parameter, even though the ranking of the genes seems to be less dependent of the tuning parameters for this method.
 
 ```{r, include = T, eval = F}
-dtw.ranking <- dtw_rank(df)
+s.dtw.ranking <- dtw_rank(df, reg.f = "ns", s.df = "4")
 ```
 
 ```{r}
-plot_multigenes(df, dtw.ranking, rownames(ranking.df(dtw.ranking))[1:9], grid.size = c(2,4))
+plot_multigenes(df, s.dtw.ranking, rownames(ranking.df(s.dtw.ranking))[1:8], grid.size = c(2,4))
+```
+
+
+# 5 - Combining both methods
+
+We also tried to combine both methods by first aligning the cells of both lineages on a common time scale with DTW and then computing their similarity thanks to the likelihood method. As in the other methods the tuning parameters are the choice of the regression and the smoothing parameter.
+
+We can see the warped pattern by calling `dtw_align` with `align.show = true`
+```{r}
+gene <- "Cbr2"
+grid.arrange(reg_gam(df, gene, reg.f = "ns", s.df = 4)$pl, dtw_align(df, gene, reg.f = "ns", s.df = 4, align.show = T)$pl, ncol = 2)
+```
+
+Computation of the combined method :
+```{r, include=T, eval =F}
+s.mix.ranking <- likelihood_rank(df, reg.f = "ns", s.df = 4, dtw =T)
+```
+
+```{r}
+plot_multigenes(df, s.mix.ranking, rownames(ranking.df(s.mix.ranking))[1:8], grid.size = c(2,4))
 ```
 
 # 5 - Compare different rankings of genes
 
 ## One versus one comparison 
 
-You can compare two rankings with the `compare_rankings` function which wrapps three different comparison:
+You can compare two rankings with the `rankings_compare` function which wrapps three different comparisons:
 - A scatter plot of both lineages;
 - A comparison of the shared elements in the differents quantiles of the two rankings
 - A measure of the [Kendall's tau](https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient) between the two rankings (a measure of the number of concordant and discordant permutations of ranks). 
 ```{r}
-dtw_vgam <- compare_rankings(dtw.ranking, vgam.aic.ranking)
-dtw_vgam$pl
-dtw_vgam$quantiles.shared
-dtw_vgam$kendall.tau
+dtw.aic <- rankings_compare(s.dtw.ranking, s.aic.ranking)
+dtw.aic$pl
+dtw.aic$shared.q
+dtw.aic$kendalls.tau
 ```
 
 ## Multiple comparisons
 
-We provided `kendall.heatmap` a quick visualization for multiple rank comparisons:
+We provided `kendall.heatmap` a quick visualization tool for multiple rank comparisons:
 ```{r}
-kendall.heatmap(list(vgam.aic.ranking, lo.aic.ranking, dtw.ranking,euclidean.ranking))
+kendall.heatmap(list(s.dtw.ranking, s.aic.ranking, s.mix.ranking, euclidean.ranking))
+s.aic.ranking@params$method <- "ns aic"
 ```
+
+Note: We added as a reference method the pointwise difference measure with eculidean distance between the lienages. This last measure coincids with the dtw when the window size for the warping is 0 (no warping).
 
 # Explore one particular ranking
 
-We also created an visualization of the distribution of the distances used for ranking genes. We plot this as an Elbow curve, which point at a hard threshold for differentially expressed genes based on this distribution.
+We also created an visualization of the distribution of the distances used for ranking genes. We plot this as an Elbow curve, which points at a hard threshold for differentially expressed genes based on this distribution.
 ```{r}
-elbow_curve(vgam.aic.ranking)
+elbow_curve(s.mix.ranking)
 ```
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
-
-# References
-

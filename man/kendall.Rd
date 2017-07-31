@@ -4,7 +4,8 @@
 \alias{kendall}
 \title{Compute kendall's tau between two rankings}
 \usage{
-kendall(ranking1, ranking2, nmax = min(dim(ranking1)[1], dim(ranking2)[1]))
+kendall(ranking1, ranking2, nmax = min(dim(ranking.df(ranking1))[1],
+  dim(ranking.df(ranking2))[1]))
 }
 \arguments{
 \item{ranking1}{a first \code{rankingDE} object.}

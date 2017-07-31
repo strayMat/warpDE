@@ -140,7 +140,7 @@ plot_multigenes <- function(data,
                             subset.genes,
                             reg.f = "ns",
                             span = 0.75,
-                            df = 4,
+                            s.df = 4,
                             null.model = F,
                             grid.size = NULL
 ){

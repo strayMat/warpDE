@@ -13,7 +13,7 @@
 #'
 #' @export
 
-quantiles_shared <- function(ranking1, ranking2, quantiles = c(0.01,seq(0.05,1, length.out = 20)), nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
+quantiles_shared <- function(ranking1, ranking2, quantiles = c(0.01,seq(0.05,1, length.out = 20)), nmax = min(dim(ranking.df(ranking1))[1], dim(ranking.df(ranking2))[1])){
   method1 <- params(ranking1)$method
   method2 <- params(ranking2)$method
   if (!is.null(params(ranking1)$reg)){
@@ -22,15 +22,13 @@ quantiles_shared <- function(ranking1, ranking2, quantiles = c(0.01,seq(0.05,1, 
   if (!is.null(params(ranking2)$reg)){
     method2 <- paste(method2, (params(ranking2)$reg))
   }
-  ranking1 <- ranking.df(ranking1)
-  ranking2 <- ranking.df(ranking2)
-  best1 <- ranking1[order(ranking1[,2]),]
-  best2 <- ranking2[order(ranking2[,2]),]
+  r1 <- ranking.df(ranking1)
+  r2 <- ranking.df(ranking2)
 
   ind <- round(quantiles*nmax,0)
   inter <- matrix(NA,nrow = 1, ncol = length(ind))
   for (i in 1:length(ind)){
-    inter[1,i] <- round(length(intersect(rownames(best1)[1:ind[i]], rownames(best2)[1:ind[i]]))/ind[i],2)
+    inter[1,i] <- round(length(intersect(rownames(r1)[1:ind[i]], rownames(r2)[1:ind[i]]))/ind[i],2)
   }
   colnames(inter) <- ind
   rownames(inter) <- paste(method1,"vs", method2)
@@ -50,7 +48,7 @@ quantiles_shared <- function(ranking1, ranking2, quantiles = c(0.01,seq(0.05,1, 
 #'
 #' @import ggplot2
 #' @export
-plot_rankings <- function(ranking1, ranking2, nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
+plot_rankings <- function(ranking1, ranking2, nmax = min(dim(ranking.df(ranking1))[1], dim(ranking.df(ranking2))[1])){
   xlab <- params(ranking1)$method
   ylab <- params(ranking2)$method
   if (!is.null(params(ranking1)$reg)){
@@ -59,13 +57,13 @@ plot_rankings <- function(ranking1, ranking2, nmax = min(dim(ranking1)[1], dim(r
   if (!is.null(params(ranking2)$reg)){
     ylab <- paste(ylab, (params(ranking2)$reg))
   }
-  ranking1 <- ranking.df(ranking1)
-  ranking2 <- ranking.df(ranking2)
-  ranking1 <- ranking1[ranking1[,2]<nmax,]
-  ranking2 <- ranking2[ranking2[,2]<nmax,]
-  commons <- intersect(rownames(ranking1), rownames(ranking2))
-  sc_plot <-ggplot() + geom_point(aes(ranking1[commons, 2], ranking2[commons, 2]), col = rgb(0,0,0,0.4))+
-    xlab(xlab)  + ylab(ylab) + geom_line(aes(x = 1:max(ranking1$rank, ranking2$rank), y = 1:max(ranking1$rank, ranking2$rank)), col = "red")
+  r1 <- ranking.df(ranking1)
+  r2 <- ranking.df(ranking2)
+  r1 <- r1[r1[,2]<nmax,]
+  r2 <- r2[r2[,2]<nmax,]
+  commons <- intersect(rownames(r1), rownames(r2))
+  sc_plot <-ggplot() + geom_point(aes(r1[commons, 2], r2[commons, 2]), col = rgb(0,0,0,0.4))+
+    xlab(xlab)  + ylab(ylab) + geom_line(aes(x = 1:max(r1$rank, r2$rank), y = 1:max(r1$rank, r2$rank)), col = "red")
   return(sc_plot)
 }
 
@@ -85,17 +83,18 @@ plot_rankings <- function(ranking1, ranking2, nmax = min(dim(ranking1)[1], dim(r
 #'
 #' @importFrom VGAM kendall.tau
 #' @export
-kendall <- function(ranking1,ranking2, nmax = min(dim(ranking1)[1], dim(ranking2)[1])){
-  ranking1 <- ranking.df(ranking1)
-  ranking2 <- ranking.df(ranking2)
-  ranking1 <- ranking1[ranking1[,2]<nmax,]
-  ranking2 <- ranking2[ranking2[,2]<nmax,]
-  commons <- intersect(rownames(ranking1), rownames(ranking2))
-  return(kendall.tau(ranking1[commons,2], ranking2[commons,2]))
+kendall <- function(ranking1,ranking2, nmax = min(dim(ranking.df(ranking1))[1], dim(ranking.df(ranking2))[1])){
+  r1 <- ranking.df(ranking1)
+  r2 <- ranking.df(ranking2)
+  r1 <- r1[r1[,2]<nmax,]
+  r2 <- r2[r2[,2]<nmax,]
+  commons <- intersect(rownames(r1), rownames(r2))
+  return(kendall.tau(r1[commons,2], r2[commons,2]))
 }
 
+
 #' @title Compare two rankings with different means
-#' @name compare_rankings
+#' @name rankings_compare
 #'
 #' @description Compares two \code{rankingDE} by plotting them against each othe, computing the number of shared elements in the cumulative quantiles of the rankings and computing their kendall's tau.
 #'
@@ -106,11 +105,14 @@ kendall <- function(ranking1,ranking2, nmax = min(dim(ranking1)[1], dim(ranking2
 #'
 #' @export
 
-compare_rankings <- function(ranking1, ranking2){
-  res <- list(pl = plot_rankings(ranking1, ranking2), quantiles.shared = quantiles_shared(ranking1, ranking2), kendall.tau = kendall(ranking1, ranking2))
+rankings_compare <- function(ranking1,
+                             ranking2,
+                             nmax = min(dim(ranking.df(ranking1))[1], dim(ranking.df(ranking2))[1])){
+  pl <- plot_rankings(ranking1, ranking2, nmax = nmax)
+  shared.q <- quantiles_shared(ranking1, ranking2, nmax = nmax )
+  kendalls.tau <- kendall(ranking1, ranking2, nmax = nmax)
+  return(list(pl = pl, shared.q = shared.q, kendalls.tau = kendalls.tau))
 }
-
-
 
 
 #' @title Elbow curve for a ranking
@@ -159,7 +161,7 @@ elbow_curve <- function(ranking, xmax = nrow(ranking), xfit = 0.005* nrow(rankin
 #' @importFrom corrplot corrplot
 #' @export
 #'
-kendall.heatmap <- function(rankings, labels = NULL, ...){
+kendall.heatmap <- function(rankings, labels = NULL, addCoef.col = "black", cl.pos = "n", ...){
   lr <- length(rankings)
   tau_matrix <- matrix(nrow = lr, ncol = lr)
   for (r1 in 1:lr){
@@ -174,5 +176,5 @@ kendall.heatmap <- function(rankings, labels = NULL, ...){
   colnames(tau_matrix) <- rnames
   rownames(tau_matrix) <- rnames
 
-  corrplot(tau_matrix, addCoef.col = "black", cl.pos = "n", tl.col = "black", ...)
+  corrplot(tau_matrix, addCoef.col = addCoef.col, cl.pos = cl.pos, tl.col = "black", ...)
 }

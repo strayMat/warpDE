@@ -63,7 +63,7 @@ dtw_rank <- function(data,
   dtw_ranking$rank <- n - rank(dtw_ranking$dist) + 1
   dtw_ranking <- dtw_ranking[order(dtw_ranking$rank),]
   if (reg.f =="loess"){smooth.param = span}
-  if (reg.f =="splines"){smooth.param = s.df}
+  if (reg.f =="ns"){smooth.param = s.df}
   result <- new("rankingDE", ranking.df = dtw_ranking, params = list(method = paste(reg.f, "dtw"), smooth.param = smooth.param, window.size = window.size, dtw.norm = norm))
   return(result)
 }
@@ -158,11 +158,6 @@ dtw_align <- function(data,
 
   reg.df <- data.frame(y.fit = c(y_warp1, y_warp2), x.fit = c(t_warp1, t_warp2), w.fit = c(w_warp1, w_warp2), lineage = c(rep(1, length(y_warp1)), rep(2, length(y_warp2))))
 
-  pl <- ggplot() +
-    geom_point(aes(t_warp2, y_warp2), col = "#377EB8", alpha = w_warp2, shape = 1) +
-    geom_point(aes(t_warp1, y_warp1), col = "#E41A1C", alpha = w_warp1, shape = 1) +
-    ggtitle(gene, paste(reg.f, "regression")) + coord_cartesian(ylim=c(-1.5,10))+ xlab("times") + ylab("logcounts")
-
   if (reg.f == "loess"){
     alt <- gam(y.fit ~ lineage + lo(x.fit, span = span) + lo(x.fit, span = span):lineage , weights = w.fit, data = reg.df)
   }
@@ -185,6 +180,12 @@ dtw_align <- function(data,
   regs$null <- null.m
 
   if (align.show == T){
+
+    pl <- ggplot() +
+      geom_point(aes(t_warp2, y_warp2), col = "#377EB8", alpha = w_warp2, shape = 1) +
+      geom_point(aes(t_warp1, y_warp1), col = "#E41A1C", alpha = w_warp1, shape = 1) +
+      ggtitle(gene, paste(reg.f, "regression warped")) + coord_cartesian(ylim=c(-1.5,10))+ xlab("times") + ylab("logcounts")
+
     t1new <- seq(0, max(t_warp1), length.out = length(t_warp1))
     t2new <- seq(0,max(t_warp2), length.out = length(t_warp2))
     y_pred.alt1 <- predict(alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))

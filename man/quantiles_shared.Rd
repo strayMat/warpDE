@@ -5,7 +5,8 @@
 \title{Compare two rankings by counting the shared elements along the rankings.}
 \usage{
 quantiles_shared(ranking1, ranking2, quantiles = c(0.01, seq(0.05, 1,
-  length.out = 20)), nmax = min(dim(ranking1)[1], dim(ranking2)[1]))
+  length.out = 20)), nmax = min(dim(ranking.df(ranking1))[1],
+  dim(ranking.df(ranking2))[1]))
 }
 \arguments{
 \item{ranking1}{a first \code{rankingDE} object.}

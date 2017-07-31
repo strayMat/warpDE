@@ -4,8 +4,8 @@
 \alias{plot_rankings}
 \title{Compare two rankings by scatter plotting them}
 \usage{
-plot_rankings(ranking1, ranking2, nmax = min(dim(ranking1)[1],
-  dim(ranking2)[1]))
+plot_rankings(ranking1, ranking2, nmax = min(dim(ranking.df(ranking1))[1],
+  dim(ranking.df(ranking2))[1]))
 }
 \arguments{
 \item{ranking1}{a first \code{rankingDE} object.}

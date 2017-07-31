@@ -4,7 +4,8 @@
 \alias{kendall.heatmap}
 \title{Heatmap visualization of multiple kendall comparisons}
 \usage{
-kendall.heatmap(rankings, labels = NULL, ...)
+kendall.heatmap(rankings, labels = NULL, addCoef.col = "black",
+  cl.pos = "n", ...)
 }
 \arguments{
 \item{labels}{character, a charcater vector for renaming the rankings to compare (default will use the  parameters of the rankings).}
