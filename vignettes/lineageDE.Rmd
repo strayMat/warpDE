@@ -17,7 +17,6 @@ link-citations: true
 knitr::opts_chunk$set(cache=TRUE, message = F, warning = F, fig.height=4, fig.width=6, fig.align="center")
 library(ggplot2)
 theme_update(plot.title = element_text(hjust = 0.5))
-#setwd("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE")
 ```
 
 # 1 - Introduction
@@ -43,7 +42,6 @@ library(gridExtra)
 # For nice color
 library(RColorBrewer)
 data("OE_counts")
-load("Data/OE_counts.RData")
 ```
 
 We perform a usual transformation with `log(1+x)` and we run PCA as the dimension reduction technique:
