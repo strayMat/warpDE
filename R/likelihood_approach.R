@@ -70,7 +70,7 @@ likelihood_rank <- function(data,
                             fam = "gaussian",
                             dtw = F){
   res <- list()
-  criteria <- sapply(rownames(data@counts), function(x) likelihood_criteria(data, x, reg.f, span = span, s.df = s.df, fam = fam, dtw = dtw))
+  criteria <- sapply(rownames(data@counts), function(x) likelihood_criteria(data, x, reg.f, span = span, s.df = s.df, fam = fam, dtw = dtw, pval = pval))
   if (pval == T){
     aic <- unlist(criteria[1,])
   }
