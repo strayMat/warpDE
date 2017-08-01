@@ -45,8 +45,7 @@ library(slingshot)
 library(gridExtra)
 # For nice colors
 library(RColorBrewer)
-#data("OE_counts")
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/data/OE_counts.RData")
+data("OE_counts")
 ```
 
 We perform a usual transformation with `log(1+x)` and we run PCA as the dimension reduction technique:
