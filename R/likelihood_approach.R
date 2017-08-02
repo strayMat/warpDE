@@ -5,7 +5,7 @@
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
-#' @param reg.f the regression method to use, either "loess" with the gam package or "splines" which fits a spline with gam package.
+#' @param reg.f the regression method to use, either "loess" with the gam package, "ns" which fits a natural cubic spline with gam package or "splines" which fits a smoothing spline (default is "loess").
 #' @param pval logical, if the likelihood criteria is to be computed or not (default is FALSE).
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
@@ -21,7 +21,7 @@
 
 likelihood_criteria <- function(data,
                                 gene,
-                                reg.f = "ns",
+                                reg.f = "loess",
                                 pval = F,
                                 span = 0.75,
                                 s.df = 4,
@@ -51,7 +51,7 @@ likelihood_criteria <- function(data,
 #' @description compute vgam ranks with likelihood ratio test p-values and aic difference criteria
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
-#' @param reg.f the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.
+#' @param reg.f the regression method to use, either "loess" with the gam package, "ns" which fits a natural cubic spline with gam package or "splines" which fits a smoothing spline (default is "loess").
 #' @param pval logical, if the pval criteria is to be computedor not (default is F).
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
@@ -63,7 +63,7 @@ likelihood_criteria <- function(data,
 #' @export
 
 likelihood_rank <- function(data,
-                            reg.f = "ns",
+                            reg.f = "loess",
                             pval = F,
                             span = 0.75,
                             s.df = 4,

@@ -4,13 +4,13 @@
 \alias{dtw_rank}
 \title{Compute a ranking of a list of genes based on the dtw distance between two lineages}
 \usage{
-dtw_rank(data, reg.f = "ns", span = 0.75, s.df = 4, norm = "L2",
+dtw_rank(data, reg.f = "loess", span = 0.75, s.df = 4, norm = "L2",
   window.size = NULL, equal.size = NULL, Zscore = F)
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with genes to be ranked.}
 
-\item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).}
+\item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").}
 
 \item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 

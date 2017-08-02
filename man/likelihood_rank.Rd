@@ -4,13 +4,13 @@
 \alias{likelihood_rank}
 \title{Vgam ranks}
 \usage{
-likelihood_rank(data, reg.f = "ns", pval = F, span = 0.75, s.df = 4,
+likelihood_rank(data, reg.f = "loess", pval = F, span = 0.75, s.df = 4,
   fam = "gaussian", dtw = F)
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
 
-\item{reg.f}{the regression method to use, either "loess" with the gam package or "vgam" which fits a spline with loess package.}
+\item{reg.f}{the regression method to use, either "loess" with the gam package, "ns" which fits a natural cubic spline with gam package or "splines" which fits a smoothing spline (default is "loess").}
 
 \item{pval}{logical, if the pval criteria is to be computedor not (default is F).}
 

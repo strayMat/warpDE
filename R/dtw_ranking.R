@@ -5,7 +5,7 @@
 #'
 #' @param data a \code{lineageDEDataSet} with genes to be ranked.
 #' @param gene character, a gene of interest.
-#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).
+#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param norm  character,("L2" or "L1") the norm to be used for the dtw distance (default is "L2")
@@ -18,7 +18,7 @@
 #' @importFrom dtwclust dtw_basic
 #' @export
 dtw_rank <- function(data,
-                     reg.f = "ns",
+                     reg.f = "loess",
                      span = 0.75,
                      s.df = 4,
                      norm ="L2",
@@ -77,7 +77,7 @@ dtw_rank <- function(data,
 #'
 #' @param data a \code{lineageDEDataSet} with genes to be ranked.
 #' @param gene character, a gene of interest.
-#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).
+#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param norm  character,("L2" or "L1") the norm to be used for the dtw distance (default is "L2").
@@ -92,7 +92,7 @@ dtw_rank <- function(data,
 #' @export
 dtw_align <- function(data,
                       gene,
-                      reg.f = "ns",
+                      reg.f = "loess",
                       span = 0.75,
                       s.df = 4,
                       norm ="L2",

@@ -4,7 +4,7 @@
 \alias{plot_multigenes}
 \title{Plot several genes expression patterns}
 \usage{
-plot_multigenes(data, ranking, subset.genes, reg.f = "ns", span = 0.75,
+plot_multigenes(data, ranking, subset.genes, reg.f = "loess", span = 0.75,
   s.df = 4, null.model = F, grid.size = NULL)
 }
 \arguments{
@@ -14,7 +14,7 @@ plot_multigenes(data, ranking, subset.genes, reg.f = "ns", span = 0.75,
 
 \item{subset.genes}{character vector, the names of the genes of interest.}
 
-\item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).}
+\item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").}
 
 \item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 

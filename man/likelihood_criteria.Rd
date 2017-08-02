@@ -4,7 +4,7 @@
 \alias{likelihood_criteria}
 \title{Compute pvalues and aic difference criteria}
 \usage{
-likelihood_criteria(data, gene, reg.f = "ns", pval = F, span = 0.75,
+likelihood_criteria(data, gene, reg.f = "loess", pval = F, span = 0.75,
   s.df = 4, fam = "gaussian", dtw = F)
 }
 \arguments{
@@ -12,7 +12,7 @@ likelihood_criteria(data, gene, reg.f = "ns", pval = F, span = 0.75,
 
 \item{gene}{character, a gene of interest.}
 
-\item{reg.f}{the regression method to use, either "loess" with the gam package or "splines" which fits a spline with gam package.}
+\item{reg.f}{the regression method to use, either "loess" with the gam package, "ns" which fits a natural cubic spline with gam package or "splines" which fits a smoothing spline (default is "loess").}
 
 \item{pval}{logical, if the likelihood criteria is to be computed or not (default is FALSE).}
 

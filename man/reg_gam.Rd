@@ -4,15 +4,16 @@
 \alias{reg_gam}
 \title{Plot one gene raw data and its regressions}
 \usage{
-reg_gam(data, gene, reg.f = "ns", span = 0.75, s.df = 4, regression = T,
-  null.model = T, npred = F, sd.show = F, legend.show = F)
+reg_gam(data, gene, reg.f = "loess", span = 0.75, s.df = 4,
+  regression = T, null.model = T, npred = F, sd.show = F,
+  legend.show = F)
 }
 \arguments{
 \item{data}{a \code{lineageDEDataSet} with results to be plotted.}
 
 \item{gene}{character, a gene of interest.}
 
-\item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).}
+\item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").}
 
 \item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 

@@ -4,8 +4,8 @@
 \alias{dtw_align}
 \title{Align with dtw two lineages}
 \usage{
-dtw_align(data, gene, reg.f = "ns", span = 0.75, s.df = 4, norm = "L2",
-  window.type = "none", window.size = 50, align.show = F,
+dtw_align(data, gene, reg.f = "loess", span = 0.75, s.df = 4,
+  norm = "L2", window.type = "none", window.size = 50, align.show = F,
   legend.show = F)
 }
 \arguments{
@@ -13,7 +13,7 @@ dtw_align(data, gene, reg.f = "ns", span = 0.75, s.df = 4, norm = "L2",
 
 \item{gene}{character, a gene of interest.}
 
-\item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).}
+\item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").}
 
 \item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 

@@ -7,7 +7,7 @@
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
-#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).
+#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param regression logical, if the loess regression is to be computed and plotted or not (default is TRUE).
@@ -27,7 +27,7 @@
 #' @export
 reg_gam <- function(data,
                     gene,
-                    reg.f = "ns",
+                    reg.f = "loess",
                     span = 0.75,
                     s.df = 4,
                     regression = T,
@@ -123,7 +123,7 @@ reg_gam <- function(data,
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param ranking a \code{rankingDE} object, rankings rows of the genes of interest in the ranking dataframe.
 #' @param subset.genes character vector, the names of the genes of interest.
-#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is ns).
+#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param null.model logical, if the plot of null model is wanted (default is FALSE).
@@ -138,7 +138,7 @@ reg_gam <- function(data,
 plot_multigenes <- function(data,
                             ranking,
                             subset.genes,
-                            reg.f = "ns",
+                            reg.f = "loess",
                             span = 0.75,
                             s.df = 4,
                             null.model = F,
