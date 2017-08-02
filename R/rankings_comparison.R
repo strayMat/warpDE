@@ -153,6 +153,9 @@ elbow_curve <- function(ranking, xmax = nrow(ranking), xfit = 0.005* nrow(rankin
 #'
 #' @param ranking list, a list of \code{rankingDE} objects.
 #' @param labels character, a charcater vector for renaming the rankings to compare (default will use the  parameters of the rankings).
+#' @param method Character, the visualization method of correlation matrix to be used. Currently, it supports seven methods, named "circle" , "square" (default), "ellipse", "number", "pie", "shade" and "color".
+#' @param addCoef.plot Color of coefficients added on the graph. If NULL, add no coefficients (default is black).
+#' @param cl.pos Character or logical, position of color labels; If character, it must be one of "r", "b" or "n"(default), "n" means don't draw colorlabel.
 #' @param ... other parameters for the function \code{corrplot}.
 #'
 #' @return returns a heatmap of kendall's tau
@@ -161,7 +164,12 @@ elbow_curve <- function(ranking, xmax = nrow(ranking), xfit = 0.005* nrow(rankin
 #' @importFrom corrplot corrplot
 #' @export
 #'
-kendall.heatmap <- function(rankings, labels = NULL, addCoef.col = "black", cl.pos = "n", ...){
+kendall.heatmap <- function(rankings,
+                            labels = NULL,
+                            method = "square",
+                            addCoef.col = "black",
+                            cl.pos = "n",
+                            ...){
   lr <- length(rankings)
   tau_matrix <- matrix(nrow = lr, ncol = lr)
   for (r1 in 1:lr){
@@ -176,5 +184,5 @@ kendall.heatmap <- function(rankings, labels = NULL, addCoef.col = "black", cl.p
   colnames(tau_matrix) <- rnames
   rownames(tau_matrix) <- rnames
 
-  corrplot(tau_matrix, addCoef.col = addCoef.col, cl.pos = cl.pos, tl.col = "black", ...)
+  corrplot(tau_matrix, method = method, addCoef.col = addCoef.col, cl.pos = cl.pos, tl.col = "black", ...)
 }

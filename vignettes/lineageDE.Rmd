@@ -17,7 +17,7 @@ theme: united
 ---
 
 ```{r setup, include = F}
-knitr::opts_chunk$set(cache=TRUE, message = F, warning = F, fig.height = 4, fig.width = 8, fig.align = "center")
+knitr::opts_chunk$set(cache=TRUE, message = F, warning = F, fig.height = 6, fig.width = 10, fig.align = "center")
 library(ggplot2)
 theme_update(plot.title = element_text(hjust = 0.5))
 set.seed(48132) # for reproductivity
@@ -50,7 +50,7 @@ data("OE_counts")
 
 We perform a usual transformation with `log(1+x)` and we run PCA as the dimension reduction technique:
 ```{r}
-pca <- prcomp(t(log1p(f.counts)))
+pca <- prcomp(t(log1p(counts)))
 # nice colors for the clusters
 clust_col = brewer.pal(length(unique(clusters)),"Set3")[as.numeric(clusters)] 
 plot3d(pca$x[,1:3], col = clust_col)
@@ -88,10 +88,10 @@ weights <- curveWeights(slrun)
 w1 <- weights[,1]/(weights[,1] + weights[,2])
 w2 <- weights[,2]/(weights[,1] + weights[,2])
 w <- cbind(w1,w2)
-df <- new("lineageDEDataSet", counts = f.counts, t = times, w = w)
+df <- new("lineageDEDataSet", counts = counts, t = times, w = w)
 ```
 
-The other dataset in the package `lineageDEDataSet_example` contains exactly this `df` object, so you are not forced to redo the whole Slinghshot workflows.
+The other dataset in the package `lineageDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole Slinghshot workflow.
 
 # 2 - Visualization of the data
 
@@ -104,12 +104,12 @@ reg_gam(df, gene, regression = F)
 
 We fit a separate 'ns' (natural spline) regression for each lineage as the alternative model and one 'ns' regression including both lineages at the same time (the null model). This gives us a representation of the activation pattern for a given gene.
 ```{r,fig.height=4, fig.width=6, fig.align="center"}
-reg_gam(df, gene, legend.show = T)$pl
+reg_gam(df, gene, legend.show = T, reg.f = "ns")$pl
 ```
 
 The main goal of the analysis is to find genes which are strongly differrentially expressed between the two reconstructed lineages. In a sense we are searching for branching expression pattern, branching curves in our visualization.
 ```{r}
-grid.arrange(reg_gam(df, 'Cyp2g1')$pl, reg_gam(df, 'Ncaph2')$pl, ncol = 2) 
+grid.arrange(reg_gam(df, 'Cyp2g1')$pl, reg_gam(df, "Myo9a")$pl, ncol = 2)
 ```
 
 On the left,  we displayed Cyp2g1, a differentially expressed gene with a pattern similar to the ones that we want to detect.
@@ -121,11 +121,9 @@ On the right, we see an unintersting pattern for us; both genes are expressed si
 
 ```{r, include = F, echo = F}
 # load ranking instead of computing them in order to gain time for knit (from 30 min to 2 min)
-#load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/loess.rank.RDATA")
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/s.rank.RDATA")
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/s.dtw.ranking.RDATA")
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/s.mix.ranking.RDATA")
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/0rmd_lineageDE/rankings/euclidean.ranking.RDATA")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/tests/f.rankings/s.lkl.ranks.RData")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/tests/f.rankings/s.dtw.ranks.RData")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/tests/f.rankings/s.mix.ranks.RData")
 ```
 
 The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function \code{likelihood_rank} computes these values and returns a ranking. This ranking function takes a few minutes to run. 
@@ -137,13 +135,19 @@ The main tuning parameters are:
 - **the smoothing parameter:** `s.df`, the equivalent degrees of freedoms for natural splines and `span`, the span parameter for the loess.
 ```{r, include = T, eval = F}
 s.rank <- likelihood_rank(df, 'ns', pval = T, s.df = 4)
-s.aic.ranking <- s.rank$aic
-s.pval.ranking <- s.rank$pval
+s.aic.ranks <- s.rank$aic
+s.pval.ranks <- s.rank$pval
 ```
 
+You can then  plot the first genes picked by the method by running `plot_multigenes`
 ```{r}
-plot_multigenes(df, s.aic.ranking, rownames(ranking.df(s.aic.ranking))[1:8], grid.size = c(2,4))
-plot_multigenes(df, s.pval.ranking, rownames(ranking.df(s.pval.ranking))[1:8], grid.size = c(2,4))
+plot_multigenes(df, s.aic.ranks, rownames(ranking.df(s.aic.ranks))[1:8], grid.size = c(2,4))
+plot_multigenes(df, s.pval.ranks, rownames(ranking.df(s.pval.ranks))[1:8], grid.size = c(2,4))
+```
+
+Here is also an exemple of the worst genes picked by this method : 
+```{r}
+plot_multigenes(df, s.pval.ranks, tail(rownames(ranking.df(s.pval.ranks)),8), grid.size = c(2,4))
 ```
 
 ## 3.2 - DTW method
@@ -151,13 +155,12 @@ plot_multigenes(df, s.pval.ranking, rownames(ranking.df(s.pval.ranking))[1:8], g
 Another way to infer differentially expressed genes is to consider the gene counts as time series data. Thus, for each gene we simply compare the difference between each lineages with the Dynamic Time Warping distance which allows local distorsions of the time axis. We can also choose the regression and the smoothing parameter, even though the ranking of the genes seems to be less dependent of the tuning parameters for this method. Another important tuning parameter is the window size of the warping, which changes how locally the distorsion is performed.
 
 ```{r, include = T, eval = F}
-s.dtw.ranking <- dtw_rank(df, reg.f = "ns", s.df = 4)
+s.dtw.ranks <- dtw_rank(df, reg.f = "ns", s.df = 4)
 ```
 
 ```{r}
-plot_multigenes(df, s.dtw.ranking, rownames(ranking.df(s.dtw.ranking))[1:8], grid.size = c(2,4))
+plot_multigenes(df, s.dtw.ranks, rownames(ranking.df(s.dtw.ranks))[1:8], grid.size = c(2,4))
 ```
-
 
 ## 3.3 - Combining both methods
 
@@ -165,17 +168,17 @@ We also tried to combine both methods. First, we align the cells of both lineage
 
 We can see the warped pattern by calling `dtw_align` with `align.show = true`
 ```{r}
-gene <- "Cbr2"
+gene <- "Prpf8"
 grid.arrange(reg_gam(df, gene, reg.f = "ns", s.df = 4)$pl, dtw_align(df, gene, reg.f = "ns", s.df = 4, align.show = T)$pl, ncol = 2)
 ```
 
 Computation of the combined method :
 ```{r, include=T, eval =F}
-s.mix.ranking <- likelihood_rank(df, reg.f = "ns", s.df = 4, dtw = T)$aic
+s.mix.ranks <- likelihood_rank(df, reg.f = "ns", s.df = 4, dtw = T)$aic
 ```
 
 ```{r, fig.align = 'center'}
-plot_multigenes(df, s.mix.ranking, rownames(ranking.df(s.mix.ranking))[1:8], grid.size = c(2,4))
+plot_multigenes(df, s.mix.ranks, rownames(ranking.df(s.mix.ranks))[1:8], grid.size = c(2,4))
 ```
 
 # 4 - Compare different rankings of genes
@@ -183,11 +186,14 @@ plot_multigenes(df, s.mix.ranking, rownames(ranking.df(s.mix.ranking))[1:8], gri
 ## 4.1 - One versus one comparison 
 
 You can compare two rankings with the `rankings_compare` function which wrapps three different comparisons:
+
 - A scatter plot of both lineages;
+
 - A comparison of the shared elements in the differents quantiles of the two rankings
+
 - A measure of the [Kendall's tau](https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient) between the two rankings (a measure of the number of concordant and discordant permutations of ranks). 
 ```{r, fig.width= 7}
-dtw.aic <- rankings_compare(s.dtw.ranking, s.mix.ranking)
+dtw.aic <- rankings_compare(s.dtw.ranks, s.mix.ranks)
 dtw.aic$pl
 dtw.aic$shared.q
 dtw.aic$kendalls.tau
@@ -196,17 +202,15 @@ dtw.aic$kendalls.tau
 ## 4.2 - Multiple comparisons
 
 We provided `kendall.heatmap` a quick visualization tool for multiple rank comparisons:
-```{r, fig.width = 7, fig.height = 7}
-kendall.heatmap(list(s.aic.ranking, s.mix.ranking, s.dtw.ranking, euclidean.ranking))
+```{r, fig.width = 6, fig.height = 6}
+kendall.heatmap(list(s.aic.ranks, s.mix.ranks, s.dtw.ranks))
 ```
-
-Note: We added as a reference method the pointwise difference measure with eculidean distance between the lienages. This last measure coincids with the dtw when the window size for the warping is 0 (no warping).
 
 ## 4.3 - Explore one particular ranking
 
 We also created an visualization of the distribution of the distances used for ranking genes. We plot this as an Elbow curve, which points at a hard threshold for differentially expressed genes based on this distribution.
-```{r, fig.width= 8}
-elbow_curve(s.mix.ranking)$pl
+```{r, fig.width= 6}
+elbow_curve(s.mix.ranks)$pl
 ```
 
 # References
