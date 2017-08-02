@@ -14,7 +14,7 @@
 
 #' @return returns the pvalue and if asked the aic difference for the gene of intereset.
 #'
-#' @importFrom VGAM logLik
+#'
 #' @importFrom VGAM AIC
 #' @importFrom VGAM df.residual
 #' @export

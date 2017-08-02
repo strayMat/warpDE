@@ -3,5 +3,7 @@
 .Ruserdata
 /tests/
 /vignettes/lineageDE_cache/
+# remove the unfiltered data (very heavy)
+data/OE_counts_unfiltered.RData
 
 
