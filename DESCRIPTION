@@ -1,4 +1,4 @@
-Package: lineageDE
+Package: warpDE
 Title: Differentially expressed genes in cell lineages 
 Version: 0.0.0.9000
 Authors@R: person("Matthieu", "Doutreligne", email = "first.last@example.com", role = c("aut", "cre"))

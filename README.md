@@ -1,4 +1,4 @@
-# R package : lineageDE
+# R package : warpDE
 Differential expressed genes between reconstructed cell lineages
 
 ### Installation
@@ -10,8 +10,8 @@ library(devtools)
 ```
 Then use the `install_github` function to install the package:
 ```r
-install_github("strayMat/lineageDE")
+install_github("strayMat/warpDE")
 ```
 ## Issues and bug reports
 
-Please use https://github.com/strayMat/lineageDE/issues to submit issues, bug reports, and comments.
+Please use https://github.com/strayMat/warpDE/issues to submit issues, bug reports, and comments.
