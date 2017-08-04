@@ -7,7 +7,7 @@
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
-#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").
+#' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "s" (default is "loess").
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param regression logical, if the loess regression is to be computed and plotted or not (default is TRUE).
@@ -22,7 +22,7 @@
 #' @import ggplot2
 #' @importFrom splines ns
 #' @importFrom gam gam
-#' @importFrom gam s
+#' @import gam
 #' @importFrom gam lo
 #' @export
 reg_gam <- function(data,
@@ -35,6 +35,7 @@ reg_gam <- function(data,
                     npred = F,
                     sd.show = F,
                     legend.show = F){
+  d <- s.df
   t = data@t
   w = data@w
   y = log1p(data@counts[gene,])
@@ -65,10 +66,10 @@ reg_gam <- function(data,
       alt <- gam(y.fit ~ lineage + lo(x.fit, span = span) + lo(x.fit, span = span):lineage , weights = w.fit, data = reg.df.d)
     }
     else if (reg.f == "ns"){
-      alt <- gam(y.fit ~ lineage + ns(x.fit, s.df) + ns(x.fit, s.df):lineage , weights = w.fit, data = reg.df.d)
+      alt <- gam(y.fit ~ lineage + ns(x.fit, df = s.df) + ns(x.fit, df = s.df):lineage , weights = w.fit, data = reg.df.d)
     }
-    else if (reg.f == "splines"){
-      alt <- gam(y.fit ~ lineage + s(x.fit, 4) + s(x.fit, 4):lineage , weights = w.fit, data = reg.df.d)
+    if (reg.f == "s"){
+      alt <- gam(y.fit ~ lineage + s(x.fit, df = d) + s(x.fit, df = d):lineage , weights = w.fit, data = reg.df.d)
     }
     y_pred.alt1 <- predict(alt, data.frame(x.fit = t1new, lineage = rep(1, length(t1new))))
     y_pred.alt2 <- predict(alt, data.frame(x.fit = t2new, lineage = rep(2, length(t2new))))
@@ -82,8 +83,8 @@ reg_gam <- function(data,
       else if (reg.f == "ns"){
         null.m <- gam(y.fit ~ ns(x.fit, df = s.df), weights = w.fit, data = reg.df.d)
       }
-      else if (reg.f == "splines"){
-        null.m <- gam(y.fit ~ s(x.fit, df = 4), weights = w.fit, data = reg.df.d)
+      if (reg.f == "s"){
+        null.m <- gam(y.fit ~  s(x.fit, df = d), weights = w.fit, data = reg.df.d)
       }
       y_pred.null <- predict(null.m, data.frame(x.fit = t1new))
       plalt <- plalt + geom_line(aes(t1new, y_pred.null, colour = "null model"), linetype = 2, na.rm = T)
@@ -122,7 +123,8 @@ reg_gam <- function(data,
 #'
 #' @param data a \code{lineageDEDataSet} with results to be plotted.
 #' @param ranking a \code{rankingDE} object, rankings rows of the genes of interest in the ranking dataframe.
-#' @param subset.genes character vector, the names of the genes of interest.
+#' @param subset.genes character vector, let the user specifies the names of the genes of interest (default is NULL).
+#' @param quick.view character, "first" (default), "last" : specify if we want to see the 8 first or end genes of the ranking.
 #' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
@@ -137,13 +139,25 @@ reg_gam <- function(data,
 
 plot_multigenes <- function(data,
                             ranking,
-                            subset.genes,
+                            subset.genes = NULL,
+                            quick.view = "first",
                             reg.f = "loess",
                             span = 0.75,
                             s.df = 4,
                             null.model = F,
                             grid.size = NULL
 ){
+  if (is.null(subset.genes)){
+    if (quick.view == "first"){
+      subset.genes <- rownames(ranking@ranking.df)[1:8]
+    }
+    else if (quick.view == "last"){
+      subset.genes <- tail(rownames(ranking@ranking.df),8)
+    }
+    if (is.null(grid.size)){
+      grid.size <- c(2,4)
+    }
+  }
   if (is.null(grid.size)){
     c <- ceiling(sqrt(length(subset.genes)))
     grid.size <- c(c,c)

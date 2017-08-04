@@ -3,7 +3,7 @@ title: "lineageDE workflow"
 author: "Matthieu Doutreligne"
 date: "`r Sys.Date()`"
 output: 
-  rmarkdown::html_vignette:
+  pdf_document:
     toc: true
     fig_caption: yes
 vignette: >
@@ -13,7 +13,6 @@ vignette: >
 bibliography : /home/matthieu/Documents/Berkeley/work_Berkeley/paper/library.bib
 link-citations: true
 theme: united 
-
 ---
 
 ```{r setup, include = F}
@@ -126,7 +125,7 @@ load("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/tests/f.rankings
 load("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/tests/f.rankings/s.mix.ranks.RData")
 ```
 
-The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function \code{likelihood_rank} computes these values and returns a ranking. This ranking function takes a few minutes to run. 
+The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function `likelihood_rank` computes these values and returns a ranking. This ranking function takes a few minutes to run. 
 
 The main tuning parameters are: 
 
