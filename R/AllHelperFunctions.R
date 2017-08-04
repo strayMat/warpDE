@@ -1,26 +1,26 @@
 # accessor methods
-#' @describeIn lineageDEDataSet returns the matrix of counts.
-#' @param x a \code{lineageDEDataSet} object.
+#' @describeIn warpDEDataSet returns the matrix of counts.
+#' @param x a \code{warpDEDataSet} object.
 #' @export
 setMethod(
   f = "counts",
-  signature = "lineageDEDataSet",
+  signature = "warpDEDataSet",
   definition = function(x) x@counts
 )
 
-#' @describeIn lineageDEDataSet returns the vector of pseudotimes..
+#' @describeIn warpDEDataSet returns the vector of pseudotimes..
 #' @export
 setMethod(
   f = "t",
-  signature = "lineageDEDataSet",
+  signature = "warpDEDataSet",
   definition = function(x) x@t
 )
 
-#' @describeIn lineageDEDataSet returns the vector of weights.
+#' @describeIn warpDEDataSet returns the vector of weights.
 #' @export
 setMethod(
   f = "w",
-  signature = "lineageDEDataSet",
+  signature = "warpDEDataSet",
   definition = function(x) x@w
 )
 #'

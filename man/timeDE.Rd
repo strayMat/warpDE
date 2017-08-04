@@ -7,7 +7,7 @@
 timeDE(data, gene, lineage, span = 0.5)
 }
 \arguments{
-\item{data}{a \code{lineageDEDataSet} with results to be plotted.}
+\item{data}{a \code{warpDEDataSet} with results to be plotted.}
 
 \item{gene}{character, a gene of interest.}
 

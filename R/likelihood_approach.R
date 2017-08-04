@@ -3,7 +3,7 @@
 #'
 #' @description Perform a regression with \code{reg_vgam} or \code{reg_loess} function and compute p-values based on a likelihood ratio test as well as a AIC based criteria (computation of the difference of AIC between the null model and the alternative model).
 #'
-#' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' @param data a \code{warpDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
 #' @param reg.f the regression method to use, either "loess" with the gam package, "ns" which fits a natural cubic spline with gam package or "splines" which fits a smoothing spline (default is "loess").
 #' @param pval logical, if the likelihood criteria is to be computed or not (default is FALSE).
@@ -50,7 +50,7 @@ likelihood_criteria <- function(data,
 #'
 #' @description compute vgam ranks with likelihood ratio test p-values and aic difference criteria
 #'
-#' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' @param data a \code{warpDEDataSet} with results to be plotted.
 #' @param reg.f the regression method to use, either "loess" with the gam package, "ns" which fits a natural cubic spline with gam package or "splines" which fits a smoothing spline (default is "loess").
 #' @param pval logical, if the pval criteria is to be computedor not (default is F).
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).

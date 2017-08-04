@@ -8,7 +8,7 @@ dtw_rank(data, reg.f = "loess", span = 0.75, s.df = 4, norm = "L2",
   window.size = NULL, equal.size = NULL, Zscore = F)
 }
 \arguments{
-\item{data}{a \code{lineageDEDataSet} with genes to be ranked.}
+\item{data}{a \code{warpDEDataSet} with genes to be ranked.}
 
 \item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").}
 

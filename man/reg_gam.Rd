@@ -9,11 +9,11 @@ reg_gam(data, gene, reg.f = "loess", span = 0.75, s.df = 4,
   legend.show = F)
 }
 \arguments{
-\item{data}{a \code{lineageDEDataSet} with results to be plotted.}
+\item{data}{a \code{warpDEDataSet} with results to be plotted.}
 
 \item{gene}{character, a gene of interest.}
 
-\item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").}
+\item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "s" (default is "loess").}
 
 \item{span}{numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).}
 

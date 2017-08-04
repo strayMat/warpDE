@@ -9,7 +9,7 @@ dtw_align(data, gene, reg.f = "loess", span = 0.75, s.df = 4,
   legend.show = F)
 }
 \arguments{
-\item{data}{a \code{lineageDEDataSet} with genes to be ranked.}
+\item{data}{a \code{warpDEDataSet} with genes to be ranked.}
 
 \item{gene}{character, a gene of interest.}
 

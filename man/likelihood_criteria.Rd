@@ -8,7 +8,7 @@ likelihood_criteria(data, gene, reg.f = "loess", pval = F, span = 0.75,
   s.df = 4, fam = "gaussian", dtw = F)
 }
 \arguments{
-\item{data}{a \code{lineageDEDataSet} with results to be plotted.}
+\item{data}{a \code{warpDEDataSet} with results to be plotted.}
 
 \item{gene}{character, a gene of interest.}
 

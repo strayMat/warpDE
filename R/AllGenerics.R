@@ -1,10 +1,10 @@
 # data object
-#' @title Initialize an object of class \code{lineageDEDataSet}
-#' @name newlineageDEDataSet
+#' @title Initialize an object of class \code{warpDEDataSet}
+#' @name newwarpDEDataSet
 #' @docType methods
 #'
-#' @description Constructs a \code{lineageDEDataSet} object. Additional helper
-#'   methods for manipulating \code{lineageDEDataSet} objects are  also
+#' @description Constructs a \code{warpDEDataSet} object. Additional helper
+#'   methods for manipulating \code{warpDEDataSet} objects are  also
 #'   described below.
 #'
 #' @param counts matrix. An \code{n} by \code{m} numeric matrix or data
@@ -17,10 +17,10 @@
 #'   denoting each cell's probability to belonng to each lineage. The probability should be convex, i.e The sum of the columns shoudl add up to 1.
 
 setGeneric(
-  name = "newLineageDEDataSet",
+  name = "newwarpDEDataSet",
   signature = c('counts','t', 'w'),
   def = function(counts, t, w, ...) {
-    standardGeneric("newLineageDEDataSet")
+    standardGeneric("newwarpDEDataSet")
   }
 )
 

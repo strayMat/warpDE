@@ -1,16 +1,16 @@
-#' @title Class \code{lineageDEDataSet}
-#' @aliases lineageDEDataSet
+#' @title Class \code{warpDEDataSet}
+#' @aliases warpDEDataSet
 #'
-#' @description The \code{lineageDEDataSet} class holds data relevant for
-#'   performing gene differential expression analysis with the \code{lineageDE} package, primarily a filtered, normalized count matrix of the data and a vecotr of pseudotimes for the cells as well as a vector of the weigths indicating the probability for each cell to belong to one lineage.
-#'   All \code{lineageDE} methods can take an object of the class
-#'   \code{lineageDEDataSet} as input and will output the same.
+#' @description The \code{warpDEDataSet} class holds data relevant for
+#'   performing gene differential expression analysis with the \code{warpDE} package, primarily a filtered, normalized count matrix of the data and a vecotr of pseudotimes for the cells as well as a vector of the weigths indicating the probability for each cell to belong to one lineage.
+#'   All \code{warpDE} methods can take an object of the class
+#'   \code{warpDEDataSet} as input and will output the same.
 #'
 #' @import methods
 #' @export
 #'
 setClass(
-  Class = "lineageDEDataSet",
+  Class = "warpDEDataSet",
   representation =  representation(
     counts = "matrix",
     t = "matrix",
@@ -19,7 +19,7 @@ setClass(
   prototype(counts = NULL, t = NULL, w = NULL)
 )
 
-setValidity("lineageDEDataSet", function(object){
+setValidity("warpDEDataSet", function(object){
   X <- counts(object)
   n <- nrow(X)
   m <- ncol(X)
@@ -62,7 +62,7 @@ setValidity("lineageDEDataSet", function(object){
 #' @title Class \code{rankingDE}
 #' @aliases rankingDE
 #'
-#' @description The \code{rankingDE} class holds da ranking format for the \code{lineageDE} package
+#' @description The \code{rankingDE} class holds da ranking format for the \code{warpDE} package
 #'  It is crafted to be part of the workflow for differentially expressed gen inference and the exploration of the genes ranking.
 
 #' @import methods

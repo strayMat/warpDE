@@ -1,5 +1,5 @@
 ---
-title: "lineageDE workflow"
+title: "warpDE workflow"
 author: "Matthieu Doutreligne"
 date: "`r Sys.Date()`"
 output: 
@@ -24,7 +24,7 @@ set.seed(48132) # for reproductivity
 
 # 1 - Introduction
 
-This vignette describes the workflow of the R package `lineageDE`, showing three different methods to infer differentially expressed genes from reconstructed cell lineages. After a first step of cell ordering reconstruction performed with `Slingshot` (see [@Street2017]), we try to find genes with significantly different behaviours between two cell lineages.
+This vignette describes the workflow of the R package `warpDE`, showing three different methods to infer differentially expressed genes from reconstructed cell lineages. After a first step of cell ordering reconstruction performed with `Slingshot` (see [@Street2017]), we try to find genes with significantly different behaviours between two cell lineages.
 
 This vignette uses the data from [@Fletcher2017] of Olfactory Epithelium cells from mouses. We restricted the data to only two cell lineages for simplicity purpose.
 <!-- ![Cell lineages in the study](images/fig:lignees_study.png) -->
@@ -36,10 +36,10 @@ This vignette uses the data from [@Fletcher2017] of Olfactory Epithelium cells f
 
 Before searching for differentially expressed genes between lineages, we have to preprocess the data and run slingshot on it. We use data from [@Fletcher2017], that we already have filtered and normalized with [Scone](https://github.com/YosefLab/scone). Scone tries different normalization techniques, batch or technical effects removal methods and provides tools to rank this different normalizations.
 
-We load this data from the package [lineageDE](https://github.com/strayMat/lineageDE), which contains also the different functions that we use in this study. We also load the package [slingshot](https://github.com/kstreet13/slingshot) [@Street2017] which allows us to perform the lineage inferrence.
+We load this data from the package [warpDE](https://github.com/strayMat/warpDE), which contains also the different functions that we use in this study. We also load the package [slingshot](https://github.com/kstreet13/slingshot) [@Street2017] which allows us to perform the lineage inferrence.
 
 ```{r, message = F}
-library(lineageDE)
+library(warpDE)
 library(slingshot)
 library(gridExtra)
 # For nice colors
@@ -87,10 +87,10 @@ weights <- curveWeights(slrun)
 w1 <- weights[,1]/(weights[,1] + weights[,2])
 w2 <- weights[,2]/(weights[,1] + weights[,2])
 w <- cbind(w1,w2)
-df <- new("lineageDEDataSet", counts = counts, t = times, w = w)
+df <- new("warpDEDataSet", counts = counts, t = times, w = w)
 ```
 
-The other dataset in the package `lineageDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole Slinghshot workflow.
+The other dataset in the package `warpDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole Slinghshot workflow.
 
 # 2 - Visualization of the data
 
@@ -120,9 +120,9 @@ On the right, we see an unintersting pattern for us; both genes are expressed si
 
 ```{r, include = F, echo = F}
 # load ranking instead of computing them in order to gain time for knit (from 30 min to 2 min)
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/tests/f.rankings/s.lkl.ranks.RData")
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/tests/f.rankings/s.dtw.ranks.RData")
-load("/home/matthieu/Documents/Berkeley/work_Berkeley/lineageDE/tests/f.rankings/s.mix.ranks.RData")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/warpDE/tests/f.rankings/s.lkl.ranks.RData")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/warpDE/tests/f.rankings/s.dtw.ranks.RData")
+load("/home/matthieu/Documents/Berkeley/work_Berkeley/warpDE/tests/f.rankings/s.mix.ranks.RData")
 ```
 
 The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function `likelihood_rank` computes these values and returns a ranking. This ranking function takes a few minutes to run. 

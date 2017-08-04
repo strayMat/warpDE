@@ -5,7 +5,7 @@
 #'
 #' @description Tools for visualizing gene signals for one given gene with the gam framework.
 #'
-#' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' @param data a \code{warpDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
 #' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "s" (default is "loess").
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
@@ -121,7 +121,7 @@ reg_gam <- function(data,
 #'
 #' @description Tools for visualizing gene signals for sveral ranked genes and display their ranking informations.
 #'
-#' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' @param data a \code{warpDEDataSet} with results to be plotted.
 #' @param ranking a \code{rankingDE} object, rankings rows of the genes of interest in the ranking dataframe.
 #' @param subset.genes character vector, let the user specifies the names of the genes of interest (default is NULL).
 #' @param quick.view character, "first" (default), "last" : specify if we want to see the 8 first or end genes of the ranking.
@@ -174,7 +174,7 @@ plot_multigenes <- function(data,
 #'
 #' @description Tools for visualizing gene signals in time for one lineage analysis.
 #'
-#' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' @param data a \code{warpDEDataSet} with results to be plotted.
 #' @param gene character, a gene of interest.
 #' @param lineage integer, if working with multi lineages data, it sspecifies the lineage of interest).
 
@@ -220,7 +220,7 @@ timeDE <- function(data,
 #' #'
 #' #' @description Tools for visualizing gene signals for one given gene and compute vgam regression on the count data.
 #' #'
-#' #' @param data a \code{lineageDEDataSet} with results to be plotted.
+#' #' @param data a \code{warpDEDataSet} with results to be plotted.
 #' #' @param gene character, a gene of interest.
 #' #' @param model which disrtibution assumption is made on the residuals; either "negbinomial" or  gausian (default is gaussian).
 #' #' @param regression logical, if the loess regression is to be computed and plotted or not (default is TRUE).

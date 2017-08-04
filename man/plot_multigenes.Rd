@@ -4,15 +4,18 @@
 \alias{plot_multigenes}
 \title{Plot several genes expression patterns}
 \usage{
-plot_multigenes(data, ranking, subset.genes, reg.f = "loess", span = 0.75,
-  s.df = 4, null.model = F, grid.size = NULL)
+plot_multigenes(data, ranking, subset.genes = NULL, quick.view = "first",
+  reg.f = "loess", span = 0.75, s.df = 4, null.model = F,
+  grid.size = NULL)
 }
 \arguments{
-\item{data}{a \code{lineageDEDataSet} with results to be plotted.}
+\item{data}{a \code{warpDEDataSet} with results to be plotted.}
 
 \item{ranking}{a \code{rankingDE} object, rankings rows of the genes of interest in the ranking dataframe.}
 
-\item{subset.genes}{character vector, the names of the genes of interest.}
+\item{subset.genes}{character vector, let the user specifies the names of the genes of interest (default is NULL).}
+
+\item{quick.view}{character, "first" (default), "last" : specify if we want to see the 8 first or end genes of the ranking.}
 
 \item{reg.f}{a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").}
 

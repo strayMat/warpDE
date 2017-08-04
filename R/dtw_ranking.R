@@ -3,7 +3,7 @@
 #'
 #' @description
 #'
-#' @param data a \code{lineageDEDataSet} with genes to be ranked.
+#' @param data a \code{warpDEDataSet} with genes to be ranked.
 #' @param gene character, a gene of interest.
 #' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
@@ -75,7 +75,7 @@ dtw_rank <- function(data,
 #'
 #' @description Align two lineage with dtw, fit the aligned data and plot the results
 #'
-#' @param data a \code{lineageDEDataSet} with genes to be ranked.
+#' @param data a \code{warpDEDataSet} with genes to be ranked.
 #' @param gene character, a gene of interest.
 #' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
