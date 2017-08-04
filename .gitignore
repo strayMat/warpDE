@@ -2,9 +2,9 @@
 .Rhistory
 .Ruserdata
 /tests/
-/vignettes/lineageDE_cache/
+/vignettes/warpDE_cache/
 # remove the unfiltered data (very heavy)
 data/OE_counts_unfiltered.RData
-tests/build_exampleData4lineageDE.R
+tests/build_exampleData4warpDE.R
 
 
