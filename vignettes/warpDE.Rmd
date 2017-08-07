@@ -3,20 +3,23 @@ title: "warpDE workflow"
 author: "Matthieu Doutreligne"
 date: "`r Sys.Date()`"
 output: 
-  pdf_document:
+  BiocStyle::html_document2:
     toc: true
-    fig_caption: yes
 vignette: >
-  %\VignetteIndexEntry{lineage DE workflow}
+  %\VignetteIndexEntry{warpDE workflow} 
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteEncoding{UTF-8} 
 bibliography : /home/matthieu/Documents/Berkeley/work_Berkeley/paper/library.bib
 link-citations: true
-theme: united 
 ---
 
+<!-- 
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{warpDE workflow} 
+-->
+
 ```{r setup, include = F}
-knitr::opts_chunk$set(cache=TRUE, message = F, warning = F, fig.height = 6, fig.width = 10, fig.align = "center")
+knitr::opts_chunk$set(cache=TRUE, message = F, warning = F, fig.height = 6, fig.width = 10, fig.align = "center", autodep=TRUE, out.width="600px", out.height="600px", results="markup")
 library(ggplot2)
 theme_update(plot.title = element_text(hjust = 0.5))
 set.seed(48132) # for reproductivity
@@ -53,13 +56,13 @@ We perform a usual transformation with `log(1+x)` and we run PCA as the dimensio
 pca <- prcomp(t(log1p(counts)))
 # nice colors for the clusters
 clust_col = brewer.pal(length(unique(clusters)),"Set3")[as.numeric(clusters)] 
-plot3d(pca$x[,1:3], col = clust_col)
+plot3d(pca$x[,1:3], col = clust_col, size = 5)
 ```
 
 We apply slingshot to infer the lineages curves: 
 ```{r}
 slrun <- slingshot(pca$x[,1:3], clusters, start.clus = '1', end.clus = '4')
-plot3d(pca$x[,1:3], col = clust_col)
+plot3d(pca$x[,1:3], col = clust_col, size = 5)
 plot3d.SlingshotDataSet(slrun, type = "curves", add = T, size = 0.5)
 ```
 
@@ -177,7 +180,7 @@ Computation of the combined method :
 s.mix.ranks <- likelihood_rank(df, reg.f = "ns", s.df = 4, dtw = T)$aic
 ```
 
-```{r, fig.align = 'center'}
+```{r, fig.align = 'center', fig.width = 10}
 plot_multigenes(df, s.mix.ranks, rownames(ranking.df(s.mix.ranks))[1:8], grid.size = c(2,4))
 ```
 
