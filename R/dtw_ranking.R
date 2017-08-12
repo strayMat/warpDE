@@ -99,7 +99,8 @@ dtw_align <- function(data,
                       window.type = "none",
                       window.size = 50,
                       align.show = F,
-                      legend.show = F){
+                      legend.show = F,
+                      duplicate.keep = F){
   logCounts <- log1p(data@counts)
   w <- data@w
   t <- data@t
@@ -133,20 +134,25 @@ dtw_align <- function(data,
   t_warp <- (1:length(align1) + max(t[cells_shared1,1],t[cells_shared2,2]))*(max(t[cells_pred1,1],t[cells_pred2,2])-max(t[cells_shared1,1],t[cells_shared2,2]))/length(align1)
   t_w1 <- t_warp
   t_w2 <- t_warp
-  # compute a mean time for the replicated cells
-  for (e in y_w1){
-    t_w1[y_w1==e] <- mean(t_w1[y_w1==e])
+
+  if (duplicate.keep == F){
+    # compute a mean time for the replicated cells
+    for (e in y_w1){
+      t_w1[y_w1==e] <- mean(t_w1[y_w1==e])
+    }
+    for (e in y_w2){
+      t_w2[y_w2==e] <- mean(t_w2[y_w2==e])
+    }
+
+    # remove the duplicated cells
+    y_w1 <- y_w1[!rm.1]
+    y_w2 <- y_w2[!rm.2]
+    t_w1 <- t_w1[!rm.1]
+    t_w2 <- t_w2[!rm.2]
+    w_w1 <- w_w1[!rm.1]
+    w_w2 <- w_w2[!rm.2]
+
   }
-  for (e in y_w2){
-    t_w2[y_w2==e] <- mean(t_w2[y_w2==e])
-  }
-  # remove the duplicated cells
-  y_w1 <- y_w1[!rm.1]
-  y_w2 <- y_w2[!rm.2]
-  t_w1 <- t_w1[!rm.1]
-  t_w2 <- t_w2[!rm.2]
-  w_w1 <- w_w1[!rm.1]
-  w_w2 <- w_w2[!rm.2]
 
   # add the shared part
   y_warp1 <- c(y[cells_shared1], y_w1)

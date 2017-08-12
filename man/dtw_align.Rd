@@ -6,7 +6,7 @@
 \usage{
 dtw_align(data, gene, reg.f = "loess", span = 0.75, s.df = 4,
   norm = "L2", window.type = "none", window.size = 50, align.show = F,
-  legend.show = F)
+  legend.show = F, duplicate.keep = F)
 }
 \arguments{
 \item{data}{a \code{warpDEDataSet} with genes to be ranked.}

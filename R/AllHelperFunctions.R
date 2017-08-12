@@ -1,4 +1,3 @@
-# accessor methods
 #' @describeIn warpDEDataSet returns the matrix of counts.
 #' @param x a \code{warpDEDataSet} object.
 #' @export
