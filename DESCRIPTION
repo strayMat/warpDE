@@ -12,8 +12,5 @@ LazyData: true
 RoxygenNote: 6.0.1.9000
 VignetteBuilder: knitr
 Suggests: BiocStyle, knitr, rmarkdown
-<<<<<<< HEAD
 BugReports: https://github.com/strayMat/warpDE/issues
-=======
->>>>>>> 14011c48780a175c4b0ae806f1f7c354dd68e36a
 
