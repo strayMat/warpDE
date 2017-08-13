@@ -1,7 +1,8 @@
 Package: warpDE
 Title: Differentially expressed genes in cell lineages 
 Version: 0.0.0.9000
-Description: Methods for single Cell RNA sequencing (scRNA-Seq) differentially expressed (DE) genes analysis. The package proposes two different methods to infer DE genes from reconstructed cell lineages.
+Description: Methods for single Cell RNA sequencing (scRNA-Seq) differentially expressed (DE) genes 
+  analysis. The package proposes two different methods to infer DE genes from reconstructed cell lineages.
 Authors@R: c(person("Matthieu", "Doutreligne", email = "first.last@example.com", role = c("aut", "cre")))
 Author: Matthieu Doutreligne [aut, cre, cph]
 Maintainer: Matthieu Doutreligne <mat.dout@hotmail.fr>
