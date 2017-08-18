@@ -4,8 +4,8 @@
 \alias{dtw_rank}
 \title{Compute a ranking of a list of genes based on the dtw distance between two lineages}
 \usage{
-dtw_rank(data, reg.f = "loess", span = 0.75, s.df = 4, norm = "L2",
-  window.size = NULL, equal.size = NULL, Zscore = F)
+dtw_rank(data, reg.f = "loess", span = 0.75, s.df = 4,
+  window.type = "non", window.size = 50, equal.size = NULL, Zscore = F)
 }
 \arguments{
 \item{data}{a \code{warpDEDataSet} with genes to be ranked.}
@@ -16,13 +16,13 @@ dtw_rank(data, reg.f = "loess", span = 0.75, s.df = 4, norm = "L2",
 
 \item{s.df}{numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).}
 
-\item{norm}{character,("L2" or "L1") the norm to be used for the dtw distance (default is "L2")}
-
 \item{window.size}{integer, the size of the warping window (default is NULL, no window.size), see details.}
 
 \item{Zscore}{logical, decide to compute or not the dtw distance with a y-axis normalization of the data (default is FALSE).}
 
 \item{gene}{character, a gene of interest.}
+
+\item{norm}{character,("L2" or "L1") the norm to be used for the dtw distance (default is "L2")}
 
 \item{nb.prediction.points}{integer, if we want to specify the same number of points for each lineage to compute the dtw distance with (default is NULL, we use all points available in each lineage).}
 }

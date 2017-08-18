@@ -15,14 +15,14 @@
 #'
 #' @return returns a \code{rankingDE} object.
 #'
-#' @importFrom dtwclust dtw_basic
+#' @importFrom dtw dtw
 #' @export
 dtw_rank <- function(data,
                      reg.f = "loess",
                      span = 0.75,
                      s.df = 4,
-                     norm ="L2",
-                     window.size = NULL,
+                     window.type = "non",
+                     window.size = 50,
                      equal.size = NULL,
                      Zscore = F){
   logCounts <- log1p(data@counts)
@@ -55,7 +55,7 @@ dtw_rank <- function(data,
       y1new <- zscore(y1new)
       y2new <- zscore(y2new)
     }
-    dtw_dist[g] <- dtw_basic(y1new,y2new, window.size = window.size, norm = norm)
+    dtw_dist[g] <- dtw(y1new,y2new, window.type = window.type, window.size = window.size)
   }
 
   dtw_ranking <- data.frame(dist = dtw_dist )

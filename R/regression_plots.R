@@ -22,9 +22,9 @@
 #' @import ggplot2
 #' @importFrom splines ns
 #' @importFrom gam gam
-#' @import gam
 #' @importFrom gam lo
 #' @export
+######## add sd.show
 reg_gam <- function(data,
                     gene,
                     reg.f = "loess",
@@ -183,8 +183,7 @@ plot_multigenes <- function(data,
 #' \item{\code{reg}, the regression objects for the lineage of interest and the null model (flat line).}}
 #'
 #' @import ggplot2
-#'
-#' @import gam
+#' @importFrom gam gam
 #' @export
 timeDE <- function(data,
                    gene,

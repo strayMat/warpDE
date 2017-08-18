@@ -23,7 +23,6 @@ knitr::opts_chunk$set(cache=TRUE, message = F, warning = F, fig.height = 6, fig.
 library(ggplot2)
 theme_update(plot.title = element_text(hjust = 0.5))
 set.seed(48132) # for reproductivity
-
 ```
 
 # 1 - Introduction
