@@ -45,7 +45,7 @@ likelihood_criteria <- function(data,
   return(res)
 }
 
-#' @title Vgam ranks
+#' @title Likelihood ranks
 #' @name likelihood_rank
 #'
 #' @description compute vgam ranks with likelihood ratio test p-values and aic difference criteria

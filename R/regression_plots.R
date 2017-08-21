@@ -117,19 +117,20 @@ reg_gam <- function(data,
 }
 
 #' @title Plot several genes expression patterns
-#' @name plot_multigenes
+#' @name plot_genes
 #'
 #' @description Tools for visualizing gene signals for sveral ranked genes and display their ranking informations.
 #'
 #' @param data a \code{warpDEDataSet} with results to be plotted.
 #' @param ranking a \code{rankingDE} object, rankings rows of the genes of interest in the ranking dataframe.
-#' @param subset.genes character vector, let the user specifies the names of the genes of interest (default is NULL).
-#' @param quick.view character, "first" (default), "last" : specify if we want to see the 8 first or end genes of the ranking.
+#' @param genes.subset character vector, let the user specifies the names of the genes of interest (default is NULL).
+#' @param order character, "head" (default), "tail" : specify if we want to see the \code{nb.show} first or last genes of the ranking.
+#' @param nb.show numeric, number of genes displayed if genes.subset = NULL (default is 8)..
 #' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param null.model logical, if the plot of null model is wanted (default is FALSE).
-#' @param grid.size 2 by 2 vector, for the number of rows and the number of columns that we want for the plot (the size of grid must #' be greater than the number of genes of interest), default is NULL fo a squared grid.
+#' @param grid.size 2 by 2 vector, for the number of rows and the number of columns that we want for the plot (the size of grid must #' be greater than the number of genes of interest), default is NULL for a squared grid.
 #' @return a visualization of the genes of interest.
 #'
 #' @import ggplot2
@@ -137,35 +138,35 @@ reg_gam <- function(data,
 #' @export
 
 
-plot_multigenes <- function(data,
-                            ranking,
-                            subset.genes = NULL,
-                            quick.view = "first",
-                            reg.f = "loess",
-                            span = 0.75,
-                            s.df = 4,
-                            null.model = F,
-                            grid.size = NULL
+plot_genes <- function(data,
+                      ranking,
+                      genes.subset = NULL,
+                      order = "head",
+                      nb.show = 8,
+                      reg.f = "loess",
+                      span = 0.75,
+                      s.df = 4,
+                      null.model = F,
+                      grid.size = NULL
 ){
-  if (is.null(subset.genes)){
-    if (quick.view == "first"){
-      subset.genes <- rownames(ranking@ranking.df)[1:8]
+  if (is.null(genes.subset)){
+    if (order == "head"){
+      genes.subset <- rownames(ranking@ranking.df)[1:nb.show]
     }
-    else if (quick.view == "last"){
-      subset.genes <- tail(rownames(ranking@ranking.df),8)
+    else if (order == "tail"){
+      genes.subset <- tail(rownames(ranking@ranking.df),nb.show)
     }
     if (is.null(grid.size)){
-      grid.size <- c(2,4)
+      grid.size <- c(nb.show%/%4+(nb.show%%4!=0),4)
     }
   }
   if (is.null(grid.size)){
-    c <- ceiling(sqrt(length(subset.genes)))
+    c <- ceiling(sqrt(length(genes.subset)))
     grid.size <- c(c,c)
   }
-  method = ranking@params$method
-
-  subset.genes <- data.frame(ranking@ranking.df)[subset.genes,]
-  graphs <- lapply(rownames(subset.genes), function(x) reg_gam(gene = x, data = data, reg.f = reg.f, span = span, s.df =s.df, null.model = null.model)$pl + labs(subtitle = paste0(method,".dist: ",round(subset.genes[x,1],1), " | ",method,".rank:", subset.genes[x,2])))
+  method <-  ranking@params$method
+  genes.subset <- data.frame(ranking@ranking.df)[genes.subset,]
+  graphs <- lapply(rownames(genes.subset), function(x) reg_gam(gene = x, data = data, reg.f = reg.f, span = span, s.df =s.df, null.model = null.model)$pl + labs(subtitle = paste0(method,".dist: ",round(genes.subset[x,1],1), " | ",method,".rank:", genes.subset[x,2])))
   return(plot_grid(plotlist = graphs, ncol = grid.size[2], nrow = grid.size[1]))
 }
 
