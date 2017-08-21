@@ -135,33 +135,33 @@ The main tuning parameters are:
 - **the choice of regression function:** `reg.f` is either 'loess' (from  [@Cleveland1988]) or 'ns' for natural cubic splines;
 
 - **the smoothing parameter:** `s.df`, the equivalent degrees of freedoms for natural splines and `span`, the span parameter for the loess.
-```{r, include = T, eval = F}
+```{r}
 s.rank <- likelihood_rank(df, 'ns', pval = T, s.df = 4)
-s.aic.ranks <- s.rank$aic
-s.pval.ranks <- s.rank$pval
+s.aic.rank <- s.rank$aic
+s.pval.rank <- s.rank$pval
 ```
 
-You can then  plot the first genes picked by the method by running `plot_multigenes`
+You can then  plot the first genes picked by the method by running `plot_genes`
 ```{r}
-plot_multigenes(df, s.aic.ranks, rownames(ranking.df(s.aic.ranks))[1:8], grid.size = c(2,4))
-plot_multigenes(df, s.pval.ranks, rownames(ranking.df(s.pval.ranks))[1:8], grid.size = c(2,4))
+plot_genes(df, s.aic.rank)
+plot_genes(df, s.pval.rank, order = "head", nb.show = 10, grid.size = c(2,5))
 ```
 
 Here is also an exemple of the worst genes picked by this method : 
 ```{r}
-plot_multigenes(df, s.pval.ranks, tail(rownames(ranking.df(s.pval.ranks)),8), grid.size = c(2,4))
+plot_genes(df, s.pval.rank, order = "tail")
 ```
 
 ## 3.2 - DTW method
 
 Another way to infer differentially expressed genes is to consider the gene counts as time series data. Thus, for each gene we simply compare the difference between each lineages with the Dynamic Time Warping distance which allows local distorsions of the time axis. We can also choose the regression and the smoothing parameter, even though the ranking of the genes seems to be less dependent of the tuning parameters for this method. Another important tuning parameter is the window size of the warping, which changes how locally the distorsion is performed.
 
-```{r, include = T, eval = F}
-s.dtw.ranks <- dtw_rank(df, reg.f = "ns", s.df = 4)
+```{r}
+s.dtw.rank <- dtw_rank(df, reg.f = "ns" , s.df = 4)
 ```
 
 ```{r}
-plot_multigenes(df, s.dtw.ranks, rownames(ranking.df(s.dtw.ranks))[1:8], grid.size = c(2,4))
+plot_genes(df, s.dtw.rank)
 ```
 
 ## 3.3 - Combining both methods
@@ -171,16 +171,16 @@ We also tried to combine both methods. First, we align the cells of both lineage
 We can see the warped pattern by calling `dtw_align` with `align.show = true`
 ```{r}
 gene <- "Prpf8"
-grid.arrange(reg_gam(df, gene, reg.f = "ns", s.df = 4)$pl, dtw_align(df, gene, reg.f = "ns", s.df = 4, align.show = T)$pl, ncol = 2)
+grid.arrange(reg_gam(df, gene, reg.f = "ns", s.df = 4)$pl, dtw_align(df, gene, reg.f = "ns", s.df =4, align.show = T)$pl, ncol = 2)
 ```
 
 Computation of the combined method :
-```{r, include=T, eval =F}
-s.mix.ranks <- likelihood_rank(df, reg.f = "ns", s.df = 4, dtw = T)$aic
+```{r}
+s.mix.rank <- likelihood_rank(df, reg.f = "ns", s.df = 4, dtw = T)$aic
 ```
 
 ```{r, fig.align = 'center', fig.width = 10}
-plot_multigenes(df, s.mix.ranks, rownames(ranking.df(s.mix.ranks))[1:8], grid.size = c(2,4))
+plot_genes(df, s.mix.rank)
 ```
 
 # 4 - Compare different rankings of genes
@@ -195,7 +195,7 @@ You can compare two rankings with the `rankings_compare` function which wrapps t
 
 - A measure of the [Kendall's tau](https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient) between the two rankings (a measure of the number of concordant and discordant permutations of ranks). 
 ```{r, fig.width= 7}
-dtw.aic <- rankings_compare(s.dtw.ranks, s.mix.ranks)
+dtw.aic <- rankings_compare(s.dtw.rank, s.mix.rank)
 dtw.aic$pl
 dtw.aic$shared.q
 dtw.aic$kendalls.tau
@@ -205,14 +205,14 @@ dtw.aic$kendalls.tau
 
 We provided `kendall.heatmap` a quick visualization tool for multiple rank comparisons:
 ```{r, fig.width = 6, fig.height = 6}
-kendall.heatmap(list(s.aic.ranks, s.mix.ranks, s.dtw.ranks))
+kendall.heatmap(list(s.aic.rank, s.mix.rank, s.dtw.rank))
 ```
 
 ## 4.3 - Explore one particular ranking
 
 We also created an visualization of the distribution of the distances used for ranking genes. We plot this as an Elbow curve, which points at a hard threshold for differentially expressed genes based on this distribution.
 ```{r, fig.width= 6}
-elbow_curve(s.mix.ranks)$pl
+elbow_curve(s.mix.rank)$pl
 ```
 
 # References

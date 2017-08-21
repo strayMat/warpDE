@@ -2,7 +2,7 @@
 % Please edit documentation in R/likelihood_approach.R
 \name{likelihood_rank}
 \alias{likelihood_rank}
-\title{Vgam ranks}
+\title{Likelihood ranks}
 \usage{
 likelihood_rank(data, reg.f = "loess", pval = F, span = 0.75, s.df = 4,
   fam = "gaussian", dtw = F)

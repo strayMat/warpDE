@@ -9,9 +9,10 @@
 #' @param span numeric, a smoothing parameter for the regression function (default is 0.75, see \code{gam::lo} for details).
 #' @param s.df numeric, a smoothing parameter for the nsplines regregression (default is 4, see \code{splines::s} for details about regularization).
 #' @param norm  character,("L2" or "L1") the norm to be used for the dtw distance (default is "L2")
-#' @param window.size integer, the size of the warping window (default is NULL, no window.size), see details.
-#' @param nb.prediction.points integer, if we want to specify the same number of points for each lineage to compute the dtw distance with (default is NULL, we use all points available in each lineage).
-#' @param Zscore logical, decide to compute or not the dtw distance with a y-axis normalization of the data (default is FALSE).
+#' @param window.size integer, the size of the warping window (default is 50), see details.
+#' @param equal.size integer, if we want to specify the same number of points for each lineage to compute the dtw distance with (default is NULL, we use all points available in each lineage).
+
+# @param Zscore logical, decide to compute or not the dtw distance with a y-axis normalization of the data (default is FALSE).
 #'
 #' @return returns a \code{rankingDE} object.
 #'
@@ -21,10 +22,9 @@ dtw_rank <- function(data,
                      reg.f = "loess",
                      span = 0.75,
                      s.df = 4,
-                     window.type = "non",
+                     window.type = "none",
                      window.size = 50,
-                     equal.size = NULL,
-                     Zscore = F){
+                     equal.size = NULL){
   logCounts <- log1p(data@counts)
   w <- data@w
   t <- data@t
@@ -50,12 +50,13 @@ dtw_rank <- function(data,
     y1new <- y1new[order(t[cells_pred1,1])]
     y2new <- predict(alt, data.frame(x.fit = t[cells_pred2,2], lineage = rep(2, length(cells_pred2))))
     y2new <- y2new[order(t[cells_pred2,2])]
-
-    if (Zscore == T){
-      y1new <- zscore(y1new)
-      y2new <- zscore(y2new)
-    }
-    dtw_dist[g] <- dtw(y1new,y2new, window.type = window.type, window.size = window.size)
+#
+#     if (Zscore == T){
+#       y1new <- zscore(y1new)
+#       y2new <- zscore(y2new)
+#     }
+# Do I have to normalize the dtw distance or not?
+    dtw_dist[g] <- dtw(y1new,y2new, window.type = window.type, window.size = window.size)$normalizedDistance
   }
 
   dtw_ranking <- data.frame(dist = dtw_dist )
