@@ -3,9 +3,10 @@
 .Ruserdata
 /tests/
 # remove the undesired files from vignettes
-/vignettes/warpDE_cache/
-/vignettes/warpDE_files/
-/vignettes/images/
+/vignettes/warpDE_cache/*
+/vignettes/warpDE_files/*
+/vignettes/images/*
+/vignettes/warpDE workflow_fichiers/*
 
 # remove the unfiltered data (very heavy)
 data/OE_counts_unfiltered.RData
