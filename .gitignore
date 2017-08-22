@@ -4,6 +4,7 @@
 /tests/
 /vignettes/warpDE_cache/
 /vignettes/warpDE_files/
+/vignettes/images
 
 # remove the unfiltered data (very heavy)
 data/OE_counts_unfiltered.RData
