@@ -7,16 +7,12 @@ output:
     toc: true
 vignette: >
   %\VignetteIndexEntry{warpDE workflow} 
+  %\VignettePackage{warpDE}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8} 
-bibliography : /home/matthieu/Documents/Berkeley/work_Berkeley/paper/library.bib
+bibliography : references.bib
 link-citations: true
 ---
-
-<!-- 
-%\VignetteEngine{knitr::rmarkdown}
-%\VignetteIndexEntry{warpDE workflow} 
--->
 
 ```{r setup, include = F}
 knitr::opts_chunk$set(cache=TRUE, message = F, warning = F, fig.height = 6, fig.width = 10, fig.align = "center", autodep=TRUE, out.width="600px", out.height="600px", results="markup")

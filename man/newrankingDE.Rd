@@ -14,6 +14,6 @@ newrankingDE(ranking.df, params, ...)
 }
 \description{
 Constructs a \code{rankingDE} object. Additional helper
-  methods for manipulating \code{rankingDE} objects are  also
-  described below.
+methods for manipulating \code{rankingDE} objects are  also
+described below.
 }

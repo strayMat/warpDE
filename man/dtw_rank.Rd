@@ -2,7 +2,7 @@
 % Please edit documentation in R/dtw_ranking.R
 \name{dtw_rank}
 \alias{dtw_rank}
-\title{Compute a ranking of a list of genes based on the dtw distance between two lineages}
+\title{ranking genes with dtw}
 \usage{
 dtw_rank(data, reg.f = "loess", span = 0.75, s.df = 4,
   window.type = "none", window.size = 50, equal.size = NULL)
@@ -28,5 +28,5 @@ dtw_rank(data, reg.f = "loess", span = 0.75, s.df = 4,
 returns a \code{rankingDE} object.
 }
 \description{
-
+Compute a ranking of a list of genes based on the dynamic time warping distance between two lineages.
 }

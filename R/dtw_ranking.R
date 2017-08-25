@@ -1,8 +1,7 @@
-#' @title Compute a ranking of a list of genes based on the dtw distance between two lineages
+#' @title ranking genes with dtw
 #' @name dtw_rank
 #'
-#' @description
-#'
+#' @description Compute a ranking of a list of genes based on the dynamic time warping distance between two lineages.
 #' @param data a \code{warpDEDataSet} with genes to be ranked.
 #' @param gene character, a gene of interest.
 #' @param reg.f a function to perform regression, either "ns" for natural splines, "loess" or "splines" (default is "loess").
@@ -211,47 +210,32 @@ dtw_align <- function(data,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Bootstraps over cells : for confidence interval and sd
-cells_bootstrap <- function(df, ranking.subset, nb_bootstrap = 1000){
-  sub.size <- nrow(ranking.subset)
-  prediction_length <- 100
-  bs_cells_dtw <- matrix(nrow = nb_bootstrap, ncol = sub.size)
-  genes <- rownames(ranking.subset)
-  colnames(bs_cells_dtw) <- genes
-
-  for (i in 1:nb_bootstrap){
-    # resample cells
-    bs.sample <- sample(1:ncol(df$log_counts), replace =  T)
-    bs.df <- list(log_counts = df$log_counts[,bs.sample], w = df$w[bs.sample,], t = df$t[bs.sample,])
-    t1new <- seq(0, max(bs.df$t[,1]), length.out = prediction_length)
-    t2new <- seq(0, max(bs.df$t[,2]), length.out = prediction_length)
-    bs.dtw <- array(sub.size)
-    for (g in 1:length(genes)){
-      bs.lo1 <- loess(bs.df$log_counts[genes[g],] ~ bs.df$t[,1], weights = bs.df$w[,1])
-      bs.lo2 <- loess(bs.df$log_counts[genes[g],] ~ bs.df$t[,2], weights = bs.df$w[,2])
-      bs.dtw[g] <- dtw_basic(predict(bs.lo1, t1new), predict(bs.lo2, t2new), window.size = 20, norm = "L2")
-      # # #plot curve
-      # loess_regression(genes[g], df = df)$pl +
-      #  geom_line(aes(t1new, predict(bs.lo1, t1new))) +
-      #  geom_line(aes(t2new, predict(bs.lo2, t2new)))
-    }
-    bs_cells_dtw[i,] <- bs.dtw
-  }
-  return(list(bs.distribs = bs_cells_dtw, original_ranking = ranking.subset))
-}
+#
+# # Bootstraps over cells : for confidence interval and sd
+# cells_bootstrap <- function(df, ranking.subset, nb_bootstrap = 1000){
+#   sub.size <- nrow(ranking.subset)
+#   prediction_length <- 100
+#   bs_cells_dtw <- matrix(nrow = nb_bootstrap, ncol = sub.size)
+#   genes <- rownames(ranking.subset)
+#   colnames(bs_cells_dtw) <- genes
+#
+#   for (i in 1:nb_bootstrap){
+#     # resample cells
+#     bs.sample <- sample(1:ncol(df$log_counts), replace =  T)
+#     bs.df <- list(log_counts = df$log_counts[,bs.sample], w = df$w[bs.sample,], t = df$t[bs.sample,])
+#     t1new <- seq(0, max(bs.df$t[,1]), length.out = prediction_length)
+#     t2new <- seq(0, max(bs.df$t[,2]), length.out = prediction_length)
+#     bs.dtw <- array(sub.size)
+#     for (g in 1:length(genes)){
+#       bs.lo1 <- loess(bs.df$log_counts[genes[g],] ~ bs.df$t[,1], weights = bs.df$w[,1])
+#       bs.lo2 <- loess(bs.df$log_counts[genes[g],] ~ bs.df$t[,2], weights = bs.df$w[,2])
+#       bs.dtw[g] <- dtw_basic(predict(bs.lo1, t1new), predict(bs.lo2, t2new), window.size = 20, norm = "L2")
+#       # # #plot curve
+#       # loess_regression(genes[g], df = df)$pl +
+#       #  geom_line(aes(t1new, predict(bs.lo1, t1new))) +
+#       #  geom_line(aes(t2new, predict(bs.lo2, t2new)))
+#     }
+#     bs_cells_dtw[i,] <- bs.dtw
+#   }
+#   return(list(bs.distribs = bs_cells_dtw, original_ranking = ranking.subset))
+# }

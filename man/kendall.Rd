@@ -14,7 +14,7 @@ kendall(ranking1, ranking2, nmax = min(dim(ranking.df(ranking1))[1],
 
 \item{nmax}{integer, design the last elemtns where to stop the comparison (default is the minimum length of the two rankings).
 
- @details Kendall's tau is basically the number of permutation between the ranks of the elements of two rankings : tau = ((number of concordant pairs) - (number of discordant pairs))/N}
+@details Kendall's tau is basically the number of permutation between the ranks of the elements of two rankings : tau = ((number of concordant pairs) - (number of discordant pairs))/N}
 }
 \value{
 returns Kendall's tau.

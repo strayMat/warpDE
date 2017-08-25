@@ -26,7 +26,7 @@ setGeneric(
 
 # accessor functions
 #' @title Returns the counts matrix of the dataset
-#'@name counts
+#' @name counts
 #' @param x an object that describes a dataset
 #' @return the matrix representing log1p of the data.
 #' @export

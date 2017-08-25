@@ -20,9 +20,9 @@
 }
 \description{
 The \code{warpDEDataSet} class holds data relevant for
-  performing gene differential expression analysis with the \code{warpDE} package, primarily a filtered, normalized count matrix of the data and a vecotr of pseudotimes for the cells as well as a vector of the weigths indicating the probability for each cell to belong to one lineage.
-  All \code{warpDE} methods can take an object of the class
-  \code{warpDEDataSet} as input and will output the same.
+performing gene differential expression analysis with the \code{warpDE} package, primarily a filtered, normalized count matrix of the data and a vecotr of pseudotimes for the cells as well as a vector of the weigths indicating the probability for each cell to belong to one lineage.
+All \code{warpDE} methods can take an object of the class
+\code{warpDEDataSet} as input and will output the same.
 }
 \section{Methods (by generic)}{
 \itemize{

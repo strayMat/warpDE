@@ -20,7 +20,7 @@
 }
 \description{
 The \code{rankingDE} class holds da ranking format for the \code{warpDE} package
- It is crafted to be part of the workflow for differentially expressed gen inference and the exploration of the genes ranking.
+It is crafted to be part of the workflow for differentially expressed gen inference and the exploration of the genes ranking.
 }
 \section{Methods (by generic)}{
 \itemize{

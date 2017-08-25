@@ -19,6 +19,6 @@ denoting each cell's probability to belonng to each lineage. The probability sho
 }
 \description{
 Constructs a \code{warpDEDataSet} object. Additional helper
-  methods for manipulating \code{warpDEDataSet} objects are  also
-  described below.
+methods for manipulating \code{warpDEDataSet} objects are  also
+described below.
 }
