@@ -1,5 +1,5 @@
 ---
-title: "warpDE workflow"
+title: "warpDE"
 author: "Matthieu Doutreligne"
 date: "`r Sys.Date()`"
 output: 
@@ -28,8 +28,10 @@ This vignette describes the workflow of the R package `warpDE`, showing three di
 This vignette uses the data from [@Fletcher2017] of Olfactory Epithelium cells from mouses. We restricted the data to only two cell lineages for simplicity purpose.
 <!-- ![Cell lineages in the study](images/fig:lignees_study.png) -->
 
-<img src="images/fig:lignees_study.png" alt="alt text" width=100% height=30%>
-<center>Cell lineages used in the study</center>
+```{r}
+library(knitr)
+include_graphics("images/fig_lignees_study.png", auto_pdf = TRUE)
+```
 
 ## 1.1 - Preprocessing of the data for our analysis
 
