@@ -21,7 +21,7 @@ theme_update(plot.title = element_text(hjust = 0.5))
 set.seed(48132) # for reproductivity
 ```
 
-# Introduction
+# 1 - Introduction
 
 This vignette describes the workflow of the R package `warpDE`, showing three different methods to infer differentially expressed genes from reconstructed cell lineages. After a first step of cell ordering reconstruction performed with `Slingshot` (see [@Street2017]), we try to find genes with significantly different behaviours between two cell lineages.
 
