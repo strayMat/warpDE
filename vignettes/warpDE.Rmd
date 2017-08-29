@@ -57,14 +57,18 @@ plot3d(pca$x[,1:3], col = clust_col, size = 5)
 We apply slingshot to infer the lineages curves: 
 ```{r}
 slrun <- slingshot(pca$x[,1:3], clusters, start.clus = '1', end.clus = '4')
-plot3d(pca$x[,1:3], col = clust_col, size = 5)
-plot3d.SlingshotDataSet(slrun, type = "curves", add = T, size = 0.5)
 ```
+
 
 Slingshot draws smooth curves in the 3D representation of the cells.
 
-<img src="images/slingshot3d.png" alt="alt text" width=100% height=30%>
-<center>View of the first 3 PCs of the cells with the Slingshot lineages</center>
+```{r, fig.align='center'}
+library(rgl)
+open3d()
+plot3d(pca$x[,1:3], col = clust_col, size = 5)
+plot3d.SlingshotDataSet(slrun, type = "curves", add = T, size = 0.5)
+rglwidget()
+```
 
 We can also have a 2D plot of the lineages by projecting on the first two PCs:
 

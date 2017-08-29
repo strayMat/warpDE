@@ -13,6 +13,6 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1.9000
 VignetteBuilder: knitr
-Suggests: BiocStyle, knitr, rmarkdown, testthat, Vign
+Suggests: BiocStyle, knitr, rmarkdown, testthat
 BugReports: https://github.com/strayMat/warpDE/issues
 Roxygen: list(markdown = TRUE)
