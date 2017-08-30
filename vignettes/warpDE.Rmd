@@ -1,5 +1,5 @@
 ---
-title: "warpDE workflow"
+title: "warpDE Workflow"
 author: "Matthieu Doutreligne"
 date: "`r Sys.Date()`"
 output: 
@@ -23,7 +23,7 @@ set.seed(48132) # for reproductivity
 
 # 1 - Introduction
 
-This vignette describes the workflow of the R package `warpDE`, showing three different methods to infer differentially expressed genes from reconstructed cell lineages. After a first step of cell ordering reconstruction performed with `Slingshot` (see [@Street2017]), we try to find genes with significantly different behaviours between two cell lineages.
+This vignette describes the workflow for the R package `warpDE`, illustrating three different methods to infer differentially expressed (DE) genes from reconstructed cell lineages. After a first step of lineage inference and cell pseudotime ordering performed with the R package `slingshot` @Street2017 ([@Street2017]), the goal is to indentify genes that are DE between two cell lineages.
 
 This vignette uses the data from [@Fletcher2017] of Olfactory Epithelium cells from mouses. We restricted the data to only two cell lineages for simplicity purpose.
 <!-- ![Cell lineages in the study](images/fig:lignees_study.png) -->
