@@ -23,19 +23,20 @@ set.seed(48132) # for reproductivity
 
 # 1 - Introduction
 
-This vignette describes the workflow for the R package `warpDE`, illustrating three different methods to infer differentially expressed (DE) genes from reconstructed cell lineages. After a first step of lineage inference and cell pseudotime ordering performed with the R package `slingshot` @Street2017 ([@Street2017]), the goal is to indentify genes that are DE between two cell lineages.
+This vignette describes the workflow for the R package `warpDE`, illustrating three different methods to infer differentially expressed (DE) genes from reconstructed cell lineages. After a first step of lineage inference and cell pseudotime ordering performed with the R package `slingshot` [@Street2017], the goal is to identify genes that are DE between two cell lineages.
 
-This vignette uses the data from [@Fletcher2017] of Olfactory Epithelium cells from mouses. We restricted the data to only two cell lineages for simplicity purpose.
+This vignette uses the data from [@Fletcher2017], examining the differentiation of horizontal basel cells (HBC) into neuronal and sustentatucal cells in the mouse olfactory epithelium (OE). For the sake of simplicity, we restricted the data to only two cell lineages.
+
 <!-- ![Cell lineages in the study](images/fig:lignees_study.png) -->
 
 <img src="images/fig:lignees_study.png" alt="alt text" width=100% height=30%>
 <center>Cell lineages used in the study</center>
 
-## 1.1 - Preprocessing of the data for our analysis
+## 1.1 - Preprocessing
 
-Before searching for differentially expressed genes between lineages, we have to preprocess the data and run slingshot on it. We use data from [@Fletcher2017], that we already have filtered and normalized with [Scone](https://github.com/YosefLab/scone). Scone tries different normalization techniques, batch or technical effects removal methods and provides tools to rank this different normalizations.
+Before searching for differentially expressed genes between lineages, we have to preprocess the data and run `slingshot` on it. We use data from [@Fletcher2017] [*** SD: Say where the data can be obtained.], that were already filtered and normalized with [`scone`](https://github.com/YosefLab/scone). The R package `scone` implements a variety of normalization procedures, aiming to adjust for technical effects such as batch effects and sequencing depth, and provides performance measures for selecting an appropriate procedure. 
 
-We load this data from the package [warpDE](https://github.com/strayMat/warpDE), which contains also the different functions that we use in this study. We also load the package [slingshot](https://github.com/kstreet13/slingshot) [@Street2017] which allows us to perform the lineage inferrence.
+The pre-processed OE data are available in the package [warpDE](https://github.com/strayMat/warpDE), which contains also the different functions that we use in this study. We also load the package [slingshot](https://github.com/kstreet13/slingshot) [@Street2017] which allows us to perform lineage inferrence.
 
 ```{r, message = F}
 library(warpDE)
@@ -46,7 +47,7 @@ library(RColorBrewer)
 data("OE_counts")
 ```
 
-We perform a usual transformation with `log(1+x)` and we run PCA as the dimension reduction technique:
+We perform a usual transformation with `log(1+x)` and we run principal component analysis (PCA) as the dimensionality reduction technique:
 ```{r}
 pca <- prcomp(t(log1p(counts)))
 # nice colors for the clusters
@@ -54,7 +55,7 @@ clust_col = brewer.pal(length(unique(clusters)),"Set3")[as.numeric(clusters)]
 plot3d(pca$x[,1:3], col = clust_col, size = 5)
 ```
 
-We apply slingshot to infer the lineages curves: 
+We apply slingshot to infer the lineages and pseudotimes: 
 ```{r}
 slrun <- slingshot(pca$x[,1:3], clusters, start.clus = '1', end.clus = '4')
 plot3d(pca$x[,1:3], col = clust_col, size = 5)
@@ -78,7 +79,7 @@ for(c in curves(slrun)){
 title("View of the first two Pcs of the data with principal curves")
 ```
 
-Then, we store the slingshot outputs for our future DE analysis, and we create a new data objects with the desired inputs:
+Then, we store the slingshot output in a new data object of class `warpDEDataSet` with the desired input for our future DE analysis: 
 ```{r}
 times <- pseudotime(slrun)
 weights <- curveWeights(slrun)
@@ -89,7 +90,7 @@ w <- cbind(w1,w2)
 df <- new("warpDEDataSet", counts = counts, t = times, w = w)
 ```
 
-The other dataset in the package `warpDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole Slinghshot workflow.
+The other dataset in the package `warpDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole `slinghshot` workflow.
 
 # 2 - Visualization of the data
 
