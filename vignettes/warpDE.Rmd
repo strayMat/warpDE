@@ -1,5 +1,9 @@
 ---
+<<<<<<< HEAD
 title: "warpDE"
+=======
+title: "warpDE Workflow"
+>>>>>>> b80f669767231806b9536472d7cc1c59fb80ce0d
 author: "Matthieu Doutreligne"
 date: "`r Sys.Date()`"
 output: 
@@ -23,9 +27,10 @@ set.seed(48132) # for reproductivity
 
 # 1 - Introduction
 
-This vignette describes the workflow of the R package `warpDE`, showing three different methods to infer differentially expressed genes from reconstructed cell lineages. After a first step of cell ordering reconstruction performed with `Slingshot` (see [@Street2017]), we try to find genes with significantly different behaviours between two cell lineages.
+This vignette describes the workflow for the R package `warpDE`, illustrating three different methods to infer differentially expressed (DE) genes from reconstructed cell lineages. After a first step of lineage inference and cell pseudotime ordering performed with the R package `slingshot` [@Street2017], the goal is to identify genes that are DE between two cell lineages.
 
-This vignette uses the data from [@Fletcher2017] of Olfactory Epithelium cells from mouses. We restricted the data to only two cell lineages for simplicity purpose.
+This vignette uses data from [@Fletcher2017], examining the differentiation of horizontal basel cells (HBC) into neuronal and sustentatucal cells in the mouse olfactory epithelium (OE). For the sake of simplicity, we restricted the data to only two cell lineages.
+
 <!-- ![Cell lineages in the study](images/fig:lignees_study.png) -->
 
 ```{r}
@@ -33,11 +38,11 @@ library(knitr)
 include_graphics("images/fig_lignees_study.png", auto_pdf = TRUE)
 ```
 
-## 1.1 - Preprocessing of the data for our analysis
+## 1.1 - Preprocessing
 
-Before searching for differentially expressed genes between lineages, we have to preprocess the data and run slingshot on it. We use data from [@Fletcher2017], that we already have filtered and normalized with [Scone](https://github.com/YosefLab/scone). Scone tries different normalization techniques, batch or technical effects removal methods and provides tools to rank this different normalizations.
+Before searching for differentially expressed genes between lineages, we have to preprocess the data and run `slingshot` on it. We use data from [@Fletcher2017] [*** SD: Say where the data can be obtained.], that were already filtered and normalized with [`scone`](https://github.com/YosefLab/scone). The R package `scone` implements a variety of normalization procedures, aiming to adjust for technical effects such as batch effects and sequencing depth, and provides performance measures for selecting an appropriate normalization. 
 
-We load this data from the package [warpDE](https://github.com/strayMat/warpDE), which contains also the different functions that we use in this study. We also load the package [slingshot](https://github.com/kstreet13/slingshot) [@Street2017] which allows us to perform the lineage inferrence.
+The pre-processed OE data are available in the package [`warpDE`](https://github.com/strayMat/warpDE), which contains also the different functions that we use in this study. We also load the package [`slingshot`](https://github.com/kstreet13/slingshot) [@Street2017] which allows us to perform lineage inferrence.
 
 ```{r, message = F}
 library(warpDE)
@@ -48,7 +53,7 @@ library(RColorBrewer)
 data("OE_counts")
 ```
 
-We perform a usual transformation with `log(1+x)` and we run PCA as the dimension reduction technique:
+We perform a usual transformation with `log(1+x)` and we run principal component analysis (PCA) as the dimensionality reduction technique:
 ```{r}
 pca <- prcomp(t(log1p(counts)))
 # nice colors for the clusters
@@ -56,13 +61,17 @@ clust_col = brewer.pal(length(unique(clusters)),"Set3")[as.numeric(clusters)]
 plot3d(pca$x[,1:3], col = clust_col, size = 5)
 ```
 
-We apply slingshot to infer the lineages curves: 
+We apply `slingshot` to infer the lineages and pseudotimes: 
 ```{r}
 slrun <- slingshot(pca$x[,1:3], clusters, start.clus = '1', end.clus = '4')
 ```
 
+<<<<<<< HEAD
 
 Slingshot draws smooth curves in the 3D representation of the cells.
+=======
+`slingshot` draws smooth curves in the 3D representation of the cells.
+>>>>>>> b80f669767231806b9536472d7cc1c59fb80ce0d
 
 ```{r, fig.align='center'}
 library(rgl)
@@ -84,7 +93,7 @@ for(c in curves(slrun)){
 title("View of the first two Pcs of the data with principal curves")
 ```
 
-Then, we store the slingshot outputs for our future DE analysis, and we create a new data objects with the desired inputs:
+Then, we store the `slingshot` output in a new data object of class `warpDEDataSet` with the desired input for our future DE analysis: 
 ```{r}
 times <- pseudotime(slrun)
 weights <- curveWeights(slrun)
@@ -95,9 +104,9 @@ w <- cbind(w1,w2)
 df <- new("warpDEDataSet", counts = counts, t = times, w = w)
 ```
 
-The other dataset in the package `warpDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole Slinghshot workflow.
+The other dataset in the package `warpDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole `slinghshot` workflow.
 
-# 2 - Visualization of the data
+# 2 - Visualization
 
 We plot the gene expression profile for the first gene of the dataset: CreER.
 The points are colored by lineage: red is the first lineage (GBC and neuronal cells) and blue is the second lineage (sustentacular cells).
@@ -105,13 +114,12 @@ The points are colored by lineage: red is the first lineage (GBC and neuronal ce
 gene <- "CreER"
 reg_gam(df, gene, regression = F)
 ```
-
-We fit a separate 'ns' (natural spline) regression for each lineage as the alternative model and one 'ns' regression including both lineages at the same time (the null model). This gives us a representation of the activation pattern for a given gene.
+We fit a separate `ns` (natural spline) regression for each lineage as the alternative model and one `ns` regression including both lineages at the same time (the null model). This gives us a representation of the activation pattern for a given gene.
 ```{r,fig.height=4, fig.width=6, fig.align="center"}
 reg_gam(df, gene, legend.show = T, reg.f = "ns")$pl
 ```
 
-The main goal of the analysis is to find genes which are strongly differrentially expressed between the two reconstructed lineages. In a sense we are searching for branching expression pattern, branching curves in our visualization.
+The main goal of the analysis is to find genes which are differrentially expressed between the two reconstructed lineages. In a sense we are searching for branching expression pattern, branching curves in our visualization.
 ```{r}
 grid.arrange(reg_gam(df, 'Cyp2g1')$pl, reg_gam(df, "Myo9a")$pl, ncol = 2)
 ```
@@ -119,9 +127,9 @@ grid.arrange(reg_gam(df, 'Cyp2g1')$pl, reg_gam(df, "Myo9a")$pl, ncol = 2)
 On the left,  we displayed Cyp2g1, a differentially expressed gene with a pattern similar to the ones that we want to detect.
 On the right, we see an unintersting pattern for us; both genes are expressed similarly in both lineages.
 
-# 3 - Differential expression inference methods
+# 3 - Differential expression methods
 
-## 3.1 - Likelihood method
+## 3.1 - Likelihood-based method
 
 ```{r, include = F, echo = F}
 # load ranking instead of computing them in order to gain time for knit (from 30 min to 2 min)
@@ -154,7 +162,7 @@ Here is also an exemple of the worst genes picked by this method :
 plot_genes(df, s.pval.rank, order = "tail")
 ```
 
-## 3.2 - DTW method
+## 3.2 - Dynamic time warping method
 
 Another way to infer differentially expressed genes is to consider the gene counts as time series data. Thus, for each gene we simply compare the difference between each lineages with the Dynamic Time Warping distance which allows local distorsions of the time axis. We can also choose the regression and the smoothing parameter, even though the ranking of the genes seems to be less dependent of the tuning parameters for this method. Another important tuning parameter is the window size of the warping, which changes how locally the distorsion is performed.
 
@@ -166,7 +174,7 @@ s.dtw.rank <- dtw_rank(df, reg.f = "ns" , s.df = 4)
 plot_genes(df, s.dtw.rank)
 ```
 
-## 3.3 - Combining both methods
+## 3.3 - Hybrid method
 
 We also tried to combine both methods. First, we align the cells of both lineages on a common time scale with DTW. Then we compute their similarity thanks to the likelihood method. As in the other methods the tuning parameters are the choice of the regression and the smoothing parameter, as well as the DTW parameters (see [@Giorgino2009] for more details on DTW options).
 
@@ -185,9 +193,9 @@ s.mix.rank <- likelihood_rank(df, reg.f = "ns", s.df = 4, dtw = T)$aic
 plot_genes(df, s.mix.rank)
 ```
 
-# 4 - Compare different rankings of genes
+# 4 - Comparison of different gene rankings
 
-## 4.1 - One versus one comparison 
+## 4.1 - One-versus-one comparison 
 
 You can compare two rankings with the `rankings_compare` function which wrapps three different comparisons:
 
@@ -210,7 +218,7 @@ We provided `kendall.heatmap` a quick visualization tool for multiple rank compa
 kendall.heatmap(list(s.aic.rank, s.mix.rank, s.dtw.rank))
 ```
 
-## 4.3 - Explore one particular ranking
+## 4.3 - Exploring one particular ranking
 
 We also created an visualization of the distribution of the distances used for ranking genes. We plot this as an Elbow curve, which points at a hard threshold for differentially expressed genes based on this distribution.
 ```{r, fig.width= 6}
