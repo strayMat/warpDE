@@ -27,10 +27,9 @@ This vignette describes the workflow of the R package [`warpDE`](https://github.
 
 This vignette uses data from [@Fletcher2017], examining the differentiation of horizontal basel cells (HBC) into neuronal cells, via globose basal cells (GBC), and into sustentatucal cells, in the mouse olfactory epithelium (OE). For the sake of simplicity, we restricted the data to only two cell lineages.
 
-<!-- ![Cell lineages in the study](images/fig:lignees_study.png) -->
 
-<img src="images/fig_lignees_study.png" alt="alt text" width=100% height=30%>
-<center>Cell lineages used in the study</center>
+
+<img src="images/fig_lignees_study.png" alt="alt text" width=100% height=30%><center>Cell lineages used in the study</center>
 
 ## 1.1 - Preprocessing
 
