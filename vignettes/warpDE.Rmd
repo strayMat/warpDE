@@ -34,7 +34,8 @@ This vignette uses data from [@Fletcher2017], examining the differentiation of h
 
 ## 1.1 - Preprocessing
 
-Before searching for differentially expressed genes between lineages, we have to preprocess the data and run `slingshot` on it. We use data from [@Fletcher2017] [*** SD: Say where the data can be obtained.], that were already filtered and normalized with [`scone`](https://github.com/YosefLab/scone). The R package `scone` implements a variety of normalization procedures, aiming to adjust for technical effects such as batch effects and sequencing depth, and provides performance measures for selecting an appropriate normalization. 
+Before searching for differentially expressed genes between lineages, we have to preprocess the data and run `slingshot` on it. We use data from [@Fletcher2017], that were already filtered and normalized with [`scone`](https://github.com/YosefLab/scone) (The original RNA-seq data can be accessed with the accession number GEO: GSE95601).
+Software. The R package `scone` implements a variety of normalization procedures, aiming to adjust for technical effects such as batch effects and sequencing depth, and provides performance measures for selecting an appropriate normalization. 
 
 The preprocessed OE data are available in the package `warpDE`, which contains also the different functions that we use in this study. We also load the package `slingshot` to perform lineage and pseudotime inferrence.
 
@@ -94,11 +95,11 @@ w <- cbind(w1,w2)
 df <- new("warpDEDataSet", counts = counts, t = times, w = w)
 ```
 
-The other dataset in the package `warpDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole `slinghshot` workflow. [*** SD: I don't see `warpDEDataSet_example' in the package.]
+The other dataset in the package `warpDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole `slinghshot` workflow.
 
 # 2 - Visualization
 
-We plot the gene expression profile for the first gene of the dataset (CreER) againg cell pseudotime for each lineage. [*** SD: First gene according to what criterion?]
+We plot the gene expression profile for one random gene of the dataset (CreER) against cell pseudotimes for each lineage.
 The points are colored by lineage: red is the first lineage (GBC and neuronal cells) and blue is the second lineage (sustentacular cells).
 ```{r,fig.height=4, fig.width=6, fig.align="center"}
 gene <- "CreER"
