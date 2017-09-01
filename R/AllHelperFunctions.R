@@ -1,3 +1,15 @@
+#' @title warpDEDataSet constructor
+#' @name warpDEDataSet
+#' @description user friendly constructor for warpDEDataSet
+#' @param data.frame expression matrix
+#' @param matrix pseudotimes values
+#' @param matrix weights values
+#' @export
+warpDEDataSet <- function(counts, t, w){
+       cat ("~~~~~ warpDEDataSet: constructor ~~~~~ \n")
+       new (Class="warpDEDataSet", counts = log1p(counts), t = t, w = w)
+  }
+
 #' @describeIn warpDEDataSet returns the matrix of counts.
 #' @param x a \code{warpDEDataSet} object.
 #' @export

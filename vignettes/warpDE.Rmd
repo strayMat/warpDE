@@ -40,6 +40,7 @@ The preprocessed OE data are available in the package `warpDE`, which contains a
 
 ```{r, message = F}
 library(warpDE)
+library(rgl)
 library(slingshot)
 library(gridExtra)
 # For nice colors
@@ -91,7 +92,7 @@ weights <- curveWeights(slrun)
 w1 <- weights[,1]/(weights[,1] + weights[,2])
 w2 <- weights[,2]/(weights[,1] + weights[,2])
 w <- cbind(w1,w2)
-df <- new("warpDEDataSet", counts = counts, t = times, w = w)
+df <- warpDEDataSet(counts, times, w)
 ```
 
 The other dataset in the package `warpDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole `slinghshot` workflow.
