@@ -12,6 +12,8 @@ Then use the `install_github` function to install the package:
 ```r
 install_github("strayMat/warpDE")
 ```
+A [vignette](https://github.com/strayMat/warpDE/vignettes) details the usual workflow for the detection of differential expressed genes in scRNA-Seq data.
+
 ## Issues and bug reports
 
 Please use https://github.com/strayMat/warpDE/issues to submit issues, bug reports, and comments.
