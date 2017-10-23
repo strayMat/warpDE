@@ -7,7 +7,7 @@ Author: Matthieu Doutreligne [aut, cre, cph]
 Maintainer: Matthieu Doutreligne <mat.dout@hotmail.fr>
 Depends:
   R (>= 3.4.1)
-Imports: ggplot2, VGAM, dtw, methods, corrplot, cowplot, gam
+Imports: ggplot2, VGAM, dtw, methods, corrplot, cowplot, gam, shiny, plotly
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
