@@ -53,10 +53,12 @@ reg_gam <- function(data,
   #time to predict the new data
   t1new <- seq(0, max(t1), length.out = length(l1_cells))
   t2new <- seq(0,max(t2), length.out = length(l2_cells))
+  ymin <- -1.5
+  ymax <- max(y)*(1.1)
   pl <- ggplot() +
     geom_point(aes(t2, y2), col = "#377EB8", alpha = w2, shape = 1) +
     geom_point(aes(t1, y1), col = "#E41A1C", alpha = w1, shape = 1) +
-    ggtitle(gene, paste(reg.f, "regression")) + coord_cartesian(ylim=c(-1.5,10))+ xlab("times") + ylab("logcounts")
+    ggtitle(gene, paste(reg.f, "regression")) + coord_cartesian(ylim=c(ymin,ymax)) + xlab("times") + ylab("logcounts")
   if (regression == F){
     return(pl)
   }

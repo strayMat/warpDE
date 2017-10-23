@@ -186,11 +186,12 @@ dtw_align <- function(data,
   regs$null <- null.m
 
   if (align.show == T){
-
+    ymin <- -1.5
+    ymax <- max(y_warp1)*(1.1)
     pl <- ggplot() +
       geom_point(aes(t_warp2, y_warp2), col = "#377EB8", alpha = w_warp2, shape = 1) +
       geom_point(aes(t_warp1, y_warp1), col = "#E41A1C", alpha = w_warp1, shape = 1) +
-      ggtitle(gene, paste(reg.f, "regression warped")) + coord_cartesian(ylim=c(-1.5,10))+ xlab("times") + ylab("logcounts")
+      ggtitle(gene, paste(reg.f, "regression warped")) + coord_cartesian(ylim=c(ymin,ymax))+ xlab("times") + ylab("logcounts")
 
     t1new <- seq(0, max(t_warp1), length.out = length(t_warp1))
     t2new <- seq(0,max(t_warp2), length.out = length(t_warp2))
