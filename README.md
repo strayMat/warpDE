@@ -8,10 +8,12 @@ You have to install and load [devtools](https://github.com/hadley/devtools). You
 install.packages("devtools")
 library(devtools)
 ```
+
 Then use the `install_github` function to install the package:
 ```r
 install_github("strayMat/warpDE")
 ```
+
 A [vignette](https://github.com/strayMat/warpDE/tree/master/vignettes) details the usual workflow for the detection of differential expressed genes in scRNA-Seq data.
 
 ## Issues and bug reports

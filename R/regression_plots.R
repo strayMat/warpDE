@@ -172,6 +172,41 @@ plot_genes <- function(data,
   return(plot_grid(plotlist = graphs, ncol = grid.size[2], nrow = grid.size[1]))
 }
 
+#' @title Plot in 3D several genes expression patterns
+#' @name plot_genes
+#'
+#' @description produce one 3D plot per gene in querry. Each plot is a 3D representation (low dimensionnal provided in the object \code{warpDEDataSet}) of the dataset with cells colored by gene level expression.
+#'
+#' @param data a \code{warpDEDataSet} with results to be plotted.
+#' @param genes.subset character vector, let the user specifies the names of the genes of interest (default is NULL).
+#' @return a visualization of the genes of interest.
+#'
+#' @import rgl
+#' @importFrom slingshot plot3d
+#' @export
+
+plot3d_genes <- function(data,
+                         genes.subset){
+  expr_palette <- colorRampPalette(c("#E86B0A", "#31FF0A"))
+
+  if (data@low.dim == "pca"){
+    low_dim.representation <- data@low.dim$x[,1:3]
+  }
+  n = len(genes.subset)
+  for (i in 1:n){
+    g_tmp <- genes.subset[i]
+    expr_tmp <- log1p(df@counts[g_tmp,])
+    text3d(0,0,0,g_tmp); next3d()
+    plot3d(low_dim.representation, col = colorby(expr_tmp, expr_palette(20)), size = 5)
+    plot3d.SlingshotDataSet(slrun, type = "curves", add = T, size = 4)
+    if (i != 9){next3d()}
+  }
+  rglwidget()
+
+}
+
+
+
 #' @title Differential Expression analysis according with time
 #' @name timeDE
 #'

@@ -16,6 +16,7 @@
 #' @return returns a \code{rankingDE} object.
 #'
 #' @importFrom dtw dtw
+#' @importFrom progress progress_bar
 #' @export
 dtw_rank <- function(data,
                      reg.f = "loess",
@@ -40,7 +41,15 @@ dtw_rank <- function(data,
     cells_pred1 <- sample(cells_pred1, equal.size)
     cells_pred2 <- sample(cells_pred2, equal.size)
   }
+  # progression bar
+  pb <- progress_bar$new(total = 100)
+  pb$tick(0)
   for (g in 1:n){
+    # progression bar update
+    if (g %% floor(n/100) == 0){
+      pb$tick()
+      Sys.sleep(1/100)
+    }
     gene <- rownames(logCounts)[g]
     y <- logCounts[g, ]
 

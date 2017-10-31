@@ -2,11 +2,15 @@
 % Please edit documentation in R/regression_plots.R
 \name{plot_genes}
 \alias{plot_genes}
+\alias{plot_genes}
+\alias{plot3d_genes}
 \title{Plot several genes expression patterns}
 \usage{
 plot_genes(data, ranking, genes.subset = NULL, order = "head",
   nb.show = 8, reg.f = "loess", span = 0.75, s.df = 4, null.model = F,
   grid.size = NULL)
+
+plot3d_genes(data, genes.subset)
 }
 \arguments{
 \item{data}{a \code{warpDEDataSet} with results to be plotted.}
@@ -28,10 +32,18 @@ plot_genes(data, ranking, genes.subset = NULL, order = "head",
 \item{null.model}{logical, if the plot of null model is wanted (default is FALSE).}
 
 \item{grid.size}{2 by 2 vector, for the number of rows and the number of columns that we want for the plot (the size of grid must #' be greater than the number of genes of interest), default is NULL for a squared grid.}
+
+\item{data}{a \code{warpDEDataSet} with results to be plotted.}
+
+\item{genes.subset}{character vector, let the user specifies the names of the genes of interest (default is NULL).}
 }
 \value{
+a visualization of the genes of interest.
+
 a visualization of the genes of interest.
 }
 \description{
 Tools for visualizing gene signals for sveral ranked genes and display their ranking informations.
+
+produce one 3D plot per gene in querry. Each plot is a 3D representation (low dimensionnal provided in the object \code{warpDEDataSet}) of the dataset with cells colored by gene level expression.
 }
