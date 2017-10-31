@@ -8,9 +8,12 @@
 #' @return returns nothing.
 #'
 #' @import shiny
-#' @importFrom plotly plot_ly
-#' @importFrom plotly add_markers
-#' @importFrom plotly layout
+#' @import plotly
+# @importFrom plotly plot_ly
+# @importFrom plotly add_markers
+# @importFrom plotly layout
+# @importFrom plotly plotlyOutput
+# @importFrom plotly renderPlotly
 #' @export
 
 warpDE_app <- function(data, ranking){

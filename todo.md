@@ -8,9 +8,9 @@
 
 - add a progression bar to the ranking function (all N/100 genes add a percent to the progression).
 
-- add the application to the package
-- 
-## Methods
+- tune the application
+
+## methods
 
 - review all methods and give them coherent names.
 
