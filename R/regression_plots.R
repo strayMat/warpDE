@@ -179,30 +179,36 @@ plot_genes <- function(data,
 #'
 #' @param data a \code{warpDEDataSet} with results to be plotted.
 #' @param genes.subset character vector, let the user specifies the names of the genes of interest (default is NULL).
+#' @param low.dim array, a 3D dimensionnal representation of the scRNA-Seq data. We expect an array of dimension (N x 3) where N is the number of cells in the experiment.
 #' @return a visualization of the genes of interest.
 #'
 #' @import rgl
-#' @importFrom slingshot plot3d
+# @importFrom slingshot plot3d
 #' @export
 
 plot3d_genes <- function(data,
-                         genes.subset){
-  expr_palette <- colorRampPalette(c("#E86B0A", "#31FF0A"))
-
-  if (data@low.dim == "pca"){
-    low_dim.representation <- data@low.dim$x[,1:3]
-  }
-  n = len(genes.subset)
+                         genes.subset,
+                         low.dim){
+  expr_palette <- colorRampPalette(c("#43473C", "#31FF0A"))
+  n <- length(genes.subset)
+  # grid specification
+  nb_row <-(n + 3 - (n%%3))/3
+  print(nb_row)
+  open3d()
+  layout3d(matrix(1:(2 * 3 * nb_row), nrow = 2 * nb_row, ncol = 3), heights = rep(c(3 / nb_row, 24 / nb_row), nb_row), sharedMouse = T)
   for (i in 1:n){
     g_tmp <- genes.subset[i]
-    expr_tmp <- log1p(df@counts[g_tmp,])
-    text3d(0,0,0,g_tmp); next3d()
-    plot3d(low_dim.representation, col = colorby(expr_tmp, expr_palette(20)), size = 5)
-    plot3d.SlingshotDataSet(slrun, type = "curves", add = T, size = 4)
-    if (i != 9){next3d()}
+    print(g_tmp)
+    expr_tmp <- log1p(data@counts[g_tmp, ])
+    text3d(0,0,0,g_tmp)
+    next3d()
+    col.ix <- cut(expr_tmp, breaks = 100)
+    cols <-expr_palette(length(levels(col.ix)))[col.ix]
+    plot3d(low.dim, col = cols, size = 5)
+    #plot3d(slrun, type = "curves", add = T, size = 4)
+    if (i != n){next3d()}
   }
   rglwidget()
-
 }
 
 

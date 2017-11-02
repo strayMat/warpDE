@@ -10,7 +10,7 @@ plot_genes(data, ranking, genes.subset = NULL, order = "head",
   nb.show = 8, reg.f = "loess", span = 0.75, s.df = 4, null.model = F,
   grid.size = NULL)
 
-plot3d_genes(data, genes.subset)
+plot3d_genes(data, genes.subset, low.dim)
 }
 \arguments{
 \item{data}{a \code{warpDEDataSet} with results to be plotted.}
@@ -32,6 +32,8 @@ plot3d_genes(data, genes.subset)
 \item{null.model}{logical, if the plot of null model is wanted (default is FALSE).}
 
 \item{grid.size}{2 by 2 vector, for the number of rows and the number of columns that we want for the plot (the size of grid must #' be greater than the number of genes of interest), default is NULL for a squared grid.}
+
+\item{low.dim}{array, a 3D dimensionnal representation of the scRNA-Seq data. We expect an array of dimension (N x 3) where N is the number of cells in the experiment.}
 
 \item{data}{a \code{warpDEDataSet} with results to be plotted.}
 
