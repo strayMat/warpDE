@@ -4,12 +4,14 @@
 \alias{warpDE_app}
 \title{Interactive plot for a ranking}
 \usage{
-warpDE_app(data, ranking)
+warpDE_app(data, ranking, nb_genes = 50)
 }
 \arguments{
-\item{data}{a \code{warpDEDataSet} with genes as rows and cells as columns.}
+\item{data}{a \code{warpDEDataSet} object with genes as rows and cells as columns.}
 
-\item{ranking}{a ranking of the gens of interest.}
+\item{ranking}{a \code{rankingDE} object , the ranking of the genes of interest that we are interested in.}
+
+\item{nb_genes}{numeric, the number of genes of interest in the list, (default is 50).}
 }
 \value{
 returns nothing.

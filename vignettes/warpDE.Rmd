@@ -21,17 +21,17 @@ theme_update(plot.title = element_text(hjust = 0.5))
 set.seed(48132) # for reproductivity
 ```
 
-# 1 - Introduction
+# Introduction
 
-This vignette describes the workflow of the R package `warpDE`, showing three different methods to infer differentially expressed genes from reconstructed cell lineages. After a first step of cell ordering reconstruction performed with `Slingshot` (see [@Street2017]), we try to find genes with significantly different behaviours between two cell lineages.
+This vignette describes the workflow of the R package `warpDE`, showing three different methods to infer differentially expressed genes from reconstructed cell lineages. After a first step of cell ordering reconstruction performed with `Slingshot` (see [@Street2017]), we try to find genes with significantly different behaviours between two cell lineages. The main goal is to provide a tool for biologists to have a quick idea about important genes involved in the differentiation process.
 
 This vignette uses the data from [@Fletcher2017] of Olfactory Epithelium cells from mouses. We restricted the data to only two cell lineages for simplicity purpose.
 <!-- ![Cell lineages in the study](images/fig:lignees_study.png) -->
 
-<img src="images/fig:lignees_study.png" alt="alt text" width=100% height=30%>
+<img src="images/fig_lignees_study.png" alt="alt text" width=100% height=30%>
 <center>Cell lineages used in the study</center>
 
-## 1.1 - Preprocessing of the data for our analysis
+## Preprocessing of the data for our analysis
 
 Before searching for differentially expressed genes between lineages, we have to preprocess the data and run slingshot on it. We use data from [@Fletcher2017], that we already have filtered and normalized with [Scone](https://github.com/YosefLab/scone). Scone tries different normalization techniques, batch or technical effects removal methods and provides tools to rank this different normalizations.
 
@@ -41,12 +41,14 @@ We load this data from the package [warpDE](https://github.com/strayMat/warpDE),
 library(warpDE)
 library(slingshot)
 library(gridExtra)
+#for 3d plots
+library(rgl)
 # For nice colors
 library(RColorBrewer)
 data("OE_counts")
 ```
 
-We perform a usual transformation with `log(1+x)` and we run PCA as the dimension reduction technique:
+We perform a usual transformation with `log(1+x)` and we run PCA as the dimension reduction technique (notice that slingshot and warpDE are flexible methods designed to work with other dimension reduction techniques):
 ```{r}
 pca <- prcomp(t(log1p(counts)))
 # nice colors for the clusters
@@ -58,13 +60,7 @@ We apply slingshot to infer the lineages curves:
 ```{r}
 slrun <- slingshot(pca$x[,1:3], clusters, start.clus = '1', end.clus = '4')
 plot3d(pca$x[,1:3], col = clust_col, size = 5)
-plot3d.SlingshotDataSet(slrun, type = "curves", add = T, size = 0.5)
-```
-
-```{r}
-plot3d(pca$x[,1:3], col = clust_col, size = 5)
-plot3d.SlingshotDataSet(slrun, type = "curves", add = T, size = 0.5)
-
+slingshot::plot3d(slrun, type = "curves", add = T, size = 0.5)
 ```
 
 Slingshot draws smooth curves in the 3D representation of the cells.
@@ -84,7 +80,7 @@ for(c in curves(slrun)){
 title("View of the first two Pcs of the data with principal curves")
 ```
 
-Then, we store the slingshot outputs for our future DE analysis, and we create a new data objects with the desired inputs:
+Then, we store the slingshot outputs for our future DE analysis, and we create a new data object with the desired inputs:
 ```{r}
 times <- pseudotime(slrun)
 weights <- curveWeights(slrun)
@@ -95,9 +91,9 @@ w <- cbind(w1,w2)
 df <- new("warpDEDataSet", counts = counts, t = times, w = w)
 ```
 
-The other dataset in the package `warpDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole Slinghshot workflow.
+Notice that the other dataset in the package `warpDEDataSet_example` contains exactly this `df` object, so you are not forced to re-do the whole Slinghshot workflow.
 
-# 2 - Visualization of the data
+# Visualization of the data
 
 We plot the gene expression profile for the first gene of the dataset: CreER.
 The points are colored by lineage: red is the first lineage (GBC and neuronal cells) and blue is the second lineage (sustentacular cells).
@@ -119,54 +115,83 @@ grid.arrange(reg_gam(df, 'Cyp2g1')$pl, reg_gam(df, "Myo9a")$pl, ncol = 2)
 On the left,  we displayed Cyp2g1, a differentially expressed gene with a pattern similar to the ones that we want to detect.
 On the right, we see an unintersting pattern for us; both genes are expressed similarly in both lineages.
 
-# 3 - Differential expression inference methods
+# Differential expressed genes search
 
-## 3.1 - Likelihood method
+## Ranking the gene
 
-```{r, include = F, echo = F}
-# load ranking instead of computing them in order to gain time for knit (from 30 min to 2 min)
-# load("/home/matthieu/Documents/Berkeley/work_Berkeley/warpDE/tests/f.rankings/s.lkl.ranks.RData")
-# load("/home/matthieu/Documents/Berkeley/work_Berkeley/warpDE/tests/f.rankings/s.dtw.ranks.RData")
-# load("/home/matthieu/Documents/Berkeley/work_Berkeley/warpDE/tests/f.rankings/s.mix.ranks.RData")
+A single function named `warpDE_rank` performs the ranking of the genes with respect to their differential expression between lineages. We developped three different methods to find these genes, briefly described in [Ranking methods](#methods). By default, `warpDE_rank` uses the mixed method 'warpDE' to rank the genes. This function is very expansive in computation time and takes a few minutes to run (especially on big datasets).
+
+```{r}
+warpDE.rank <- warpDE_rank(data = df, reg.f = 'ns', splines.df = 4, ranking_method = 'warpDE')
 ```
 
-The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function `likelihood_rank` computes these values and returns a ranking. This ranking function takes a few minutes to run. 
+## Visualization of the selected genes in 2D
+
+To see the expression level in both lineages for the best/worst genes selected by warpDE:
+```{r}
+plot_genes(data = df, ranking = warpDE.rank, order = "head", reg.f = 'ns', nb.show = 8, s.df = 4)
+```
+
+## Visualizations of selected genes in 3D
+
+To see the expression pattern on the low dimensionnal representation of the cells. Each cell is colored by the level of expression of the selected gene.
+
+```{r}
+pca <- prcomp(log1p(t(df@counts)))$x[,1:3]
+# most interesting genes 
+b.genes <- rownames(warpDE.rank@ranking.df)[1:9]
+# least interesting genes
+w.genes <- tail(rownames(warpDE.rank@ranking.df), 9)
+plot3d_genes(data = df, genes.subset = b.genes, low.dim = pca)
+plot3d_genes(data = df, genes.subset = w.genes, low.dim = pca)
+```
+
+## An interactive way to visualize the selected genes in 3D
+
+You can also call the `warpDE_app` function which allows an interactive visualization of a subset of the selected genes.
+
+```{r, run = F}
+#warpDE_app(data = df, ranking = warpDE.rank, nb_genes = 50)
+```
+
+# Ranking Methods {#methods}
+
+## Likelihood method
+
+The comparision between the alternative model and the null model can be computed via likelihood ratio test or with AIC. The function `warpDE_rank` with `ranking_method = "lrt` computes these values for the whole dataset and returns a ranking. This ranking function takes a few minutes to run. 
 
 The main tuning parameters are: 
 
 - **the choice of regression function:** `reg.f` is either 'loess' (from  [@Cleveland1988]) or 'ns' for natural cubic splines;
 
-- **the smoothing parameter:** `s.df`, the equivalent degrees of freedoms for natural splines and `span`, the span parameter for the loess.
+- **the smoothing parameter:** `splines.df`, the equivalent degrees of freedoms for natural splines and `span`, the span parameter for the loess.
 ```{r}
-s.rank <- likelihood_rank(df, 'ns', pval = T, s.df = 4)
-s.aic.rank <- s.rank$aic
-s.pval.rank <- s.rank$pval
+lrt.rank <- warpDE_rank(data = df, reg.f = 'ns', splines.df = 4, ranking_method = "lrt")
 ```
 
-You can then  plot the first genes picked by the method by running `plot_genes`
+You can then plot the first genes picked by the method by running `plot_genes`
 ```{r}
-plot_genes(df, s.aic.rank)
-plot_genes(df, s.pval.rank, order = "head", nb.show = 10, grid.size = c(2,5))
+plot_genes(df, lrt.rank)
 ```
 
 Here is also an exemple of the worst genes picked by this method : 
 ```{r}
-plot_genes(df, s.pval.rank, order = "tail")
+plot_genes(df, lrt.rank, order = "tail")
 ```
 
-## 3.2 - DTW method
+## DTW method
 
 Another way to infer differentially expressed genes is to consider the gene counts as time series data. Thus, for each gene we simply compare the difference between each lineages with the Dynamic Time Warping distance which allows local distorsions of the time axis. We can also choose the regression and the smoothing parameter, even though the ranking of the genes seems to be less dependent of the tuning parameters for this method. Another important tuning parameter is the window size of the warping, which changes how locally the distorsion is performed.
 
 ```{r}
-s.dtw.rank <- dtw_rank(df, reg.f = "ns" , s.df = 4)
+dtw.rank <- warpDE_rank(df, reg.f = "ns" , splines.df = 4, ranking_method = 'dtw')
 ```
 
 ```{r}
-plot_genes(df, s.dtw.rank)
+plot_genes(df, dtw.rank)
 ```
 
-## 3.3 - Combining both methods
+## Combining both methods
 
 We also tried to combine both methods. First, we align the cells of both lineages on a common time scale with DTW. Then we compute their similarity thanks to the likelihood method. As in the other methods the tuning parameters are the choice of the regression and the smoothing parameter, as well as the DTW parameters (see [@Giorgino2009] for more details on DTW options).
 
@@ -176,45 +201,9 @@ gene <- "Prpf8"
 grid.arrange(reg_gam(df, gene, reg.f = "ns", s.df = 4)$pl, dtw_align(df, gene, reg.f = "ns", s.df =4, align.show = T)$pl, ncol = 2)
 ```
 
-Computation of the combined method :
-```{r}
-s.mix.rank <- likelihood_rank(df, reg.f = "ns", s.df = 4, dtw = T)$aic
-```
-
 ```{r, fig.align = 'center', fig.width = 10}
-plot_genes(df, s.mix.rank)
+plot_genes(df, warpDE.rank)
 ```
 
-# 4 - Compare different rankings of genes
-
-## 4.1 - One versus one comparison 
-
-You can compare two rankings with the `rankings_compare` function which wrapps three different comparisons:
-
-- A scatter plot of both lineages;
-
-- A comparison of the shared elements in the differents quantiles of the two rankings
-
-- A measure of the [Kendall's tau](https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient) between the two rankings (a measure of the number of concordant and discordant permutations of ranks). 
-```{r, fig.width= 7}
-dtw.aic <- rankings_compare(s.dtw.rank, s.mix.rank)
-dtw.aic$pl
-dtw.aic$shared.q
-dtw.aic$kendalls.tau
-```
-
-## 4.2 - Multiple comparisons
-
-We provided `kendall.heatmap` a quick visualization tool for multiple rank comparisons:
-```{r, fig.width = 6, fig.height = 6}
-kendall.heatmap(list(s.aic.rank, s.mix.rank, s.dtw.rank))
-```
-
-## 4.3 - Explore one particular ranking
-
-We also created an visualization of the distribution of the distances used for ranking genes. We plot this as an Elbow curve, which points at a hard threshold for differentially expressed genes based on this distribution.
-```{r, fig.width= 6}
-elbow_curve(s.mix.rank)$pl
-```
 
 # References

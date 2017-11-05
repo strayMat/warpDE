@@ -2,8 +2,10 @@
 #' @name warpDE_app
 #'
 #' @description Given a ranking of genes of a scRNA-Seq experiment, open an interactive interface of the best n genes given the ranking (where n is interactively chosen by the user).
-#' @param ranking a ranking of the gens of interest.
-#' @param data a \code{warpDEDataSet} with genes as rows and cells as columns.
+#'
+#' @param ranking a \code{rankingDE} object , the ranking of the genes of interest that we are interested in.
+#' @param data a \code{warpDEDataSet} object with genes as rows and cells as columns.
+#' @param nb_genes numeric, the number of genes of interest in the list, (default is 50).
 #'
 #' @return returns nothing.
 #'
@@ -16,9 +18,8 @@
 # @importFrom plotly renderPlotly
 #' @export
 
-warpDE_app <- function(data, ranking){
+warpDE_app <- function(data, ranking, nb_genes = 50){
   genes <- rownames(ranking@ranking.df)
-  nb_genes <- 30
   palette3d <- c("#C78C0A",  "#D1B00A", "#BAB700","#0CC700", "#75D100")
 
   ui <- fluidPage(

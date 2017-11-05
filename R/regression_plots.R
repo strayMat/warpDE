@@ -13,7 +13,7 @@
 #' @param regression logical, if the loess regression is to be computed and plotted or not (default is TRUE).
 #' @param null.model logical, if the null model is to be computed and plotted or not (default is TRUE).
 #' @param npred logical, if the unshared part of the data is to be plotted or not(default is FALSE).
-#' @param sd.show logical, if the plot of standard deviation is wanted (default is FALSE).
+# @param sd.show logical, if the plot of standard deviation is wanted (default is FALSE).
 #' @param legend.show logical, if the legend is wanted (default is FALSE).
 #'
 #' @return returns \itemize{\item{\code{pl},the visualization of the data}
@@ -93,7 +93,7 @@ reg_gam <- function(data,
       regs$null = null.m
     }
   }
-  if (sd.show == T){
+  #if (sd.show == T){
       #TO ADD
       # ## confidence intervals:
       # se1 <- loess.sd(x = t[,1], y = y, weights = w[,1], nsigma = 1, na.action = na.exclude)
@@ -101,7 +101,7 @@ reg_gam <- function(data,
       #
       # plalt <- plalt + geom_ribbon(aes(x = se1$x, ymin = se1$lower, ymax = se1$upper), alpha = 0.2, fill = "#E41A1C") +
       #   geom_ribbon(aes(x = se2$x, ymin = se2$lower, ymax = se2$upper), alpha = 0.2, fill = "#377EB8")
-  }
+  #}
   if (npred == T){
       #discard unappropriate cells for new predictions (keep only w >0.5 approximately)
       middle_w1 <- w[w[,1]!=0 & w[,1]!=1,1]
@@ -189,16 +189,16 @@ plot_genes <- function(data,
 plot3d_genes <- function(data,
                          genes.subset,
                          low.dim){
+  # supress
+  options(warn = -1)
   expr_palette <- colorRampPalette(c("#43473C", "#31FF0A"))
   n <- length(genes.subset)
   # grid specification
-  nb_row <-(n + 3 - (n%%3))/3
-  print(nb_row)
+  nb_row <- n%/%3 + ((n%%3) != 0)
   open3d()
   layout3d(matrix(1:(2 * 3 * nb_row), nrow = 2 * nb_row, ncol = 3), heights = rep(c(3 / nb_row, 24 / nb_row), nb_row), sharedMouse = T)
   for (i in 1:n){
     g_tmp <- genes.subset[i]
-    print(g_tmp)
     expr_tmp <- log1p(data@counts[g_tmp, ])
     text3d(0,0,0,g_tmp)
     next3d()
@@ -209,7 +209,8 @@ plot3d_genes <- function(data,
     if (i != n){next3d()}
   }
   rglwidget()
-}
+  options(warn = 0)
+  }
 
 
 

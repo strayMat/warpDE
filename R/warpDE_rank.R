@@ -1,5 +1,5 @@
 
-#' @title Wrapper for all ranking method
+#' @title Wrapper function for all ranking methods
 #' @name warpDE_rank
 #'
 #' @description A wrapper method which takes as input a \code{warpDEDataSet} and various options to return the ranking of the genes following one of three methods available: likelihood ratio test, dynamic time warping distance, or dynamic time warping alignment followed by a likelihood ratio test.
@@ -18,13 +18,13 @@
 
 warpDE_rank<- function(data, reg.f = "loess", span = 0.75, splines.df = 4, ranking_method = "warpDE"){
   if (ranking_method == "warpDE"){
-    ranking <- likelihood_rank(data, reg.f = reg.f, span = span, s.df = splines.df, dtw = T)
+    ranking <- likelihood_rank(data, reg.f = reg.f, span = span, s.df = splines.df, dtw = T)$aic
   }
   else if (ranking_method == "dtw"){
     ranking <- dtw_rank(data, reg.f = reg.f, span = span, s.df = splines.df, window.type = "none", window.size = 50)
     }
   else if (ranking_method == "lrt"){
-    ranking <- likelihood_rank(data = data, reg.f = reg.f, span = span, s.df = splines.df, dtw = F)
+    ranking <- likelihood_rank(data = data, reg.f = reg.f, span = span, s.df = splines.df, dtw = F)$aic
   }
   else {ranking <- "Please enter a valid method: 'warpDE', 'dtw' or 'lrt'."}
   return (ranking)

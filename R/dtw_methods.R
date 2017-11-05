@@ -94,7 +94,7 @@ dtw_rank <- function(data,
 #' @param window.size integer, the size of the warping window (default is NULL, no window.size), see details.
 #' @param align.show logical, if we want to plot the alignment.
 #' @param legend.show logical, if the legend is wanted (default is FALSE).
-#'
+#' @parma duplicate.keep logical if the du
 #' @return returns a \itemize{\item \code{pl} a plotof the aligned lineages. \item \code{reg} the alternative and null model for likelihood comaprison.}
 #'
 #' @importFrom dtw dtw
