@@ -117,7 +117,7 @@ On the right, we see an unintersting pattern for us; both genes are expressed si
 
 # Differential expressed genes search
 
-## Ranking the gene
+## Ranking the genes
 
 A single function named `warpDE_rank` performs the ranking of the genes with respect to their differential expression between lineages. We developped three different methods to find these genes, briefly described in [Ranking methods](#methods). By default, `warpDE_rank` uses the mixed method 'warpDE' to rank the genes. This function is very expansive in computation time and takes a few minutes to run (especially on big datasets).
 
@@ -132,7 +132,7 @@ To see the expression level in both lineages for the best/worst genes selected b
 plot_genes(data = df, ranking = warpDE.rank, order = "head", reg.f = 'ns', nb.show = 8, s.df = 4)
 ```
 
-## Visualizations of selected genes in 3D
+## Visualization of selected genes in 3D
 
 To see the expression pattern on the low dimensionnal representation of the cells. Each cell is colored by the level of expression of the selected gene.
 
