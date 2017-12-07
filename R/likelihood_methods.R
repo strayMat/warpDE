@@ -70,17 +70,15 @@ likelihood_rank <- function(data,
                             fam = "gaussian",
                             dtw = F){
   res <- list()
-  # progress bar
-  pb <- progress_bar$new(total = 100)
-  pb$tick(0)
   n <- dim(data@counts)[1]
+  # progress bar
+  pb <- progress_bar$new(total = n)
+  pb$tick(0)
   criteria <- array(NA, dim = n)
   for (g in 1:n){
     # progression bar update
-    if (g %% floor(n/100) == 0){
-      pb$tick()
-      Sys.sleep(1/100)
-    }
+    pb$tick()
+    #Sys.sleep(1/10000)
     gene <- rownames(data@counts)[g]
     criteria[g] <- likelihood_criteria(data, gene, reg.f, span = span, s.df = s.df, fam = fam, dtw = dtw, pval = pval)
   }

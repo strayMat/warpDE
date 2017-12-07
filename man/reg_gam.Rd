@@ -25,8 +25,6 @@ reg_gam(data, gene, reg.f = "loess", span = 0.75, s.df = 4,
 
 \item{npred}{logical, if the unshared part of the data is to be plotted or not(default is FALSE).}
 
-\item{sd.show}{logical, if the plot of standard deviation is wanted (default is FALSE).}
-
 \item{legend.show}{logical, if the legend is wanted (default is FALSE).}
 }
 \value{

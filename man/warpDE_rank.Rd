@@ -2,7 +2,7 @@
 % Please edit documentation in R/warpDE_rank.R
 \name{warpDE_rank}
 \alias{warpDE_rank}
-\title{Wrapper for all ranking method}
+\title{Wrapper function for all ranking methods}
 \usage{
 warpDE_rank(data, reg.f = "loess", span = 0.75, splines.df = 4,
   ranking_method = "warpDE")
